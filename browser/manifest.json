@@ -1,0 +1,9 @@
+{
+  "manifest_version": 2,
+  "name": "state management visualizer for Apollo",
+  "version": "0.0.1",
+  "description": "state management visualizer for Apollo",
+  "minimum_chrome_version": "10.0",
+  "devtools_page": "devtools.html",
+  "permissions": ["tabs"]
+}
