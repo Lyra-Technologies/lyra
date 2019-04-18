@@ -2,18 +2,39 @@
   "name": "lnkt",
   "version": "1.0.0",
   "description": "state visualizer for Apollo",
-  "main": "index.js",
+  "main": "./src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode development"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ]
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gmal1/production.git"
   },
-  "author": "",
+  "author": "LNKT",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/gmal1/production/issues"
   },
-  "homepage": "https://github.com/gmal1/production#readme"
+  "homepage": "https://github.com/gmal1/production#readme",
+  "dependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.5",
+    "css-loader": "^2.1.1",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "style-loader": "^0.23.1"
+  },
+  "devDependencies": {
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.0"
+  }
 }
