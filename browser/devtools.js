@@ -1,11 +1,24 @@
+function show() {
+  console.log("panel showing");
+}
+
+function hide() {
+  console.log("panel hiding");
+}
+
 chrome.devtools.panels.create(
   'Apollo state visualizer',
   null,
   'devtools.html',
-  devtoolsPanel => {
-    const backgroundPageConnection = chrome.runtime.connect({
-      name: 'devtools'
-    });
+  function (panel){
+    panel.onShown.addListener(show);
+    panel.onHidden.addListener(hide);
+}
+);
+  // ,devtoolsPanel => {
+  //   const backgroundPageConnection = chrome.runtime.connect({
+  //     name: 'devtools'
+  //   });
 
     // devtoolsPanel.onShown.addListener(function tmp(panelWindow) {
     //   // this only runs once
@@ -21,5 +34,5 @@ chrome.devtools.panels.create(
     //     if (message.action === 'refresh_devtool') windowP.postMessage(message);
     //   });
     // });
-  }
-);
+  // }
+// );

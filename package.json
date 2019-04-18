@@ -1,5 +1,5 @@
 {
-  "name": "lnkt",
+  "name": "lyra",
   "version": "1.0.0",
   "description": "state visualizer for Apollo",
   "main": "./src/index.js",
