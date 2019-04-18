@@ -4,7 +4,7 @@ module.exports = {
   mode: 'development',
   entry: './src/index.js',
   output: {
-    path: path.resolve(__dirname, './browser'),
+    path: path.resolve(__dirname, './browser/build'),
     filename: 'bundle.js'
   },
   devtool: 'source-map',
@@ -22,7 +22,12 @@ module.exports = {
             presets: ['@babel/preset-react', '@babel/preset-env']
           }
         }
-      }
-    ]
+      },
+      {
+        test: /\.css$/,
+        exclude: /node_modules/,
+        loaders: ['style-loader', 'css-loader'],
+      },
+    ],
   }
 };

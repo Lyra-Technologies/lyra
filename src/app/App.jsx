@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
+import Hello from './components/helloComponent'
 
 class App extends Component {
   render() {
-    return <h1>HELLO WORLD</h1>;
+    return <Hello />;
   }
 }
 
