@@ -1,20 +1,3 @@
-function show() {
-  console.log('panel showing');
-}
-
-function hide() {
-  console.log('panel hiding');
-}
-
-chrome.devtools.panels.create(
-  'Apollo state visualizer',
-  null,
-  'devtools.html',
-  function(panel) {
-    panel.onShown.addListener(show);
-    panel.onHidden.addListener(hide);
-  }
-);
 // ,devtoolsPanel => {
 //   const backgroundPageConnection = chrome.runtime.connect({
 //     name: 'devtools'

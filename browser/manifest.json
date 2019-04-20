@@ -2,8 +2,19 @@
   "manifest_version": 2,
   "name": "Lyra",
   "version": "0.0.1",
-  "description": "State Management Visualizer for Apollo",
+  "description": "State Visualizer for Apollo",
   "minimum_chrome_version": "10.0",
   "devtools_page": "devtools.html",
-  "permissions": ["tabs"]
+  "permissions": ["tabs", "<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["scripts/contentScript.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "scripts": ["scripts/background.js"],
+    "persistent": false
+  }
 }
