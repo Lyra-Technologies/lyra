@@ -6,12 +6,23 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      payload: null
+      payload: null,
+      panelShown: false
+    };
+
+    const onPanelShown = () => {
+      chrome.runtime.sendMessage('lyra-panel-shown');
+      this.setState({ panelShown: true });
+    };
+
+    const onPanelHidden = () => {
+      chrome.runtime.sendMessage('lyra-panel-hidden');
+      this.setState({ panelShown: false });
     };
 
     chrome.devtools.panels.create('Lyra', null, 'devtools.html', panel => {
-      panel.onShown.addListener(() => console.log('panel showing!'));
-      panel.onHidden.addListener(() => console.log('panel hiding!'));
+      panel.onShown.addListener(onPanelShown);
+      panel.onHidden.addListener(onPanelHidden);
     });
   }
 
