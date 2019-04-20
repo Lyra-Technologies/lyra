@@ -5,10 +5,10 @@ const MainContainer = ({ payload }) => {
     <div id='graphContainer'>
       {payload ? (
         Object.entries(payload).map(storage => {
-          return <p key={storage[0]}>{storage}</p>;
+          return <code key={storage[0]}>{storage}</code>;
         })
       ) : (
-        <p>Waiting for local storage</p>
+        <p>Waiting for local storage...</p>
       )}
     </div>
   );
