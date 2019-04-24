@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import Header from './components/Header';
+// import Header from './components/Header';
 import MainContainer from './containers/MainContainer';
 
 class App extends Component {
@@ -7,7 +7,7 @@ class App extends Component {
     super(props);
     this.state = {
       payload: null,
-      panelShown: false
+      panelShown: false,
     };
 
     const onPanelShown = () => {
@@ -33,7 +33,7 @@ class App extends Component {
       port.postMessage({
         tabId: tabId,
         message: 'initialize devtool',
-        target: 'content'
+        target: 'content',
       });
 
       port.onMessage.addListener(message => {
@@ -42,14 +42,14 @@ class App extends Component {
     });
 
     chrome.runtime.onConnect.removeListener(() =>
-      console.log('Listener removed')
+      console.log('Listener removed'),
     );
   }
 
   render() {
     return (
       <Fragment>
-        <Header />
+        {/* <Header /> */}
         <MainContainer payload={this.state.payload} />
       </Fragment>
     );
