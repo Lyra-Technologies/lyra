@@ -1,7 +1,9 @@
 {
   "name": "lyra",
+  "author": "LNKT",
   "version": "1.0.0",
   "description": "state visualizer for Apollo",
+  "license": "ISC",
   "main": "./src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -18,8 +20,6 @@
     "type": "git",
     "url": "git+https://github.com/gmal1/production.git"
   },
-  "author": "LNKT",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/gmal1/production/issues"
   },
