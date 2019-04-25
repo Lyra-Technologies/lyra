@@ -29,12 +29,25 @@
     "@babel/preset-env": "^7.4.3",
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.5",
-    "css-loader": "^2.1.1",
+    "d3": "^5.9.2",
+    "postcss-loader": "^3.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "style-loader": "^0.23.1"
+    "react-json-view": "^1.19.1",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^0.81.2"
   },
   "devDependencies": {
+    "css-loader": "^2.1.1",
+    "file-loader": "^3.0.1",
+    "gulp-minify-css": "^1.2.4",
+    "less": "^2.7.3",
+    "less-loader": "^4.1.0",
+    "node-sass": "^4.11.0",
+    "sass-loader": "^7.1.0",
+    "semantic-ui": "^2.4.2",
+    "style-loader": "^0.23.1",
+    "url-loader": "^1.1.2",
     "webpack": "^4.30.0",
     "webpack-cli": "^3.3.0"
   }

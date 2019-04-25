@@ -1,15 +1,36 @@
 import React from 'react';
+import VisualizationContainer from '../containers/VisualizationContainer';
+
+// const styles = theme => ({
+//   progress: {
+//     margin: theme.spacing.unit * 2,
+//   },
+// });
+
+// function CircularIndeterminate(props) {
+//   const { classes } = props;
+//   return (
+//     <div>
+//       <CircularProgress className={classes.progress} />
+//     </div>
+//   );
+// }
+
+// CircularIndeterminate.propTypes = {
+//   classes: PropTypes.object.isRequired,
+// };
 
 const MainContainer = ({ payload }) => {
   return (
-    <div id='graphContainer'>
-      {payload ? (
-        Object.entries(payload).map(storage => {
-          return <code key={storage[0]}>{storage}</code>;
-        })
-      ) : (
-        <p>Waiting for local storage...</p>
-      )}
+    <div id="graphContainer">
+      {/* {payload ? ( */}
+      <VisualizationContainer /*data={props.payload}*/ />
+      {/* // ) : (
+      //   <div>
+      //     <CircularIndeterminate />
+      //     <p> loading...</p>
+      //   </div>
+      // )} */}
     </div>
   );
 };

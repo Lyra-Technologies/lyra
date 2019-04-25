@@ -7,43 +7,43 @@ class App extends Component {
     super(props);
     this.state = {
       payload: null,
-      panelShown: false
+      panelShown: false,
     };
 
-    const onPanelShown = () => {
-      chrome.runtime.sendMessage('lyra-panel-shown');
-      this.setState({ panelShown: true });
-    };
+    //   const onPanelShown = () => {
+    //     chrome.runtime.sendMessage('lyra-panel-shown');
+    //     this.setState({ panelShown: true });
+    //   };
 
-    const onPanelHidden = () => {
-      chrome.runtime.sendMessage('lyra-panel-hidden');
-      this.setState({ panelShown: false });
-    };
+    //   const onPanelHidden = () => {
+    //     chrome.runtime.sendMessage('lyra-panel-hidden');
+    //     this.setState({ panelShown: false });
+    //   };
 
-    chrome.devtools.panels.create('Lyra', null, 'devtools.html', panel => {
-      panel.onShown.addListener(onPanelShown);
-      panel.onHidden.addListener(onPanelHidden);
-    });
-  }
+    //   chrome.devtools.panels.create('Lyra', null, 'devtools.html', panel => {
+    //     panel.onShown.addListener(onPanelShown);
+    //     panel.onHidden.addListener(onPanelHidden);
+    //   });
+    // }
 
-  componentDidMount() {
-    chrome.runtime.connect({ name: 'devtool' }); // returns a port object
-    const { tabId } = chrome.devtools.inspectedWindow;
-    chrome.runtime.onConnect.addListener(port => {
-      port.postMessage({
-        tabId: tabId,
-        message: 'initialize devtool',
-        target: 'content'
-      });
+    // componentDidMount() {
+    //   chrome.runtime.connect({ name: 'devtool' }); // returns a port object
+    //   const { tabId } = chrome.devtools.inspectedWindow;
+    //   chrome.runtime.onConnect.addListener(port => {
+    //     port.postMessage({
+    //       tabId: tabId,
+    //       message: 'initialize devtool',
+    //       target: 'content'
+    //     });
 
-      port.onMessage.addListener(message => {
-        this.setState({ payload: message.payload });
-      });
-    });
+    //     port.onMessage.addListener(message => {
+    //       this.setState({ payload: message.payload });
+    //     });
+    //   });
 
-    chrome.runtime.onConnect.removeListener(() =>
-      console.log('Listener removed')
-    );
+    //   chrome.runtime.onConnect.removeListener(() =>
+    //     console.log('Listener removed')
+    //   );
   }
 
   render() {
