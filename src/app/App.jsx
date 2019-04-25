@@ -5,51 +5,56 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      payload: null,
-      panelShown: false,
+      initialized: false
     };
+
+    this.portToScripts = null;
 
     const onPanelShown = () => {
-      chrome.runtime.sendMessage('lyra-panel-shown');
-      this.setState({ panelShown: true });
+      // chrome.runtime.sendMessage('lyra-panel-shown');
+      // this.setState({ panelShown: true });
+      const { tabId } = chrome.devtools.inspectedWindow;
+
+      if (!this.state.initialized) {
+        this.portToScripts.postMessage({
+          tabId: tabId,
+          message: 'initialize devtool'
+        });
+        this.setState({ initialized: true });
+      }
     };
 
-    const onPanelHidden = () => {
-      chrome.runtime.sendMessage('lyra-panel-hidden');
-      this.setState({ panelShown: false });
-    };
+    // const onPanelHidden = () => {
+    //   chrome.runtime.sendMessage('lyra-panel-hidden');
+    //   this.setState({ panelShown: false });
+    // };
 
     chrome.devtools.panels.create('Lyra', null, 'devtools.html', panel => {
       panel.onShown.addListener(onPanelShown);
-      panel.onHidden.addListener(onPanelHidden);
+      // panel.onHidden.addListener(onPanelHidden);
     });
   }
 
   componentDidMount() {
-    chrome.runtime.connect({ name: 'devtool' }); // returns a port object
-    const { tabId } = chrome.devtools.inspectedWindow;
-    chrome.runtime.onConnect.addListener(port => {
-      port.postMessage({
-        tabId: tabId,
-        message: 'initialize devtool',
-        target: 'content',
-      });
+    const portToScripts = chrome.runtime.connect({ name: 'devtool' }); // returns a port object
+    this.portToScripts = portToScripts;
 
-      port.onMessage.addListener(message => {
-        this.setState({ payload: message.payload });
-      });
+    portToScripts.onMessage.addListener(message => {
+      // filter incoming messages
+      if (message.type === 'toRender' && message.message) {
+        // parse the data received from injected script
+        const parsed = JSON.parse(message.message);
+        chrome.storage.local.set({ ['data']: parsed }, () => {
+          console.log('storage set');
+        });
+      }
     });
-
-    chrome.runtime.onConnect.removeListener(() =>
-      console.log('Listener removed'),
-    );
   }
 
   render() {
     return (
       <Fragment>
-        {/* <Header /> */}
-        <MainContainer payload={this.state.payload} />
+        <MainContainer />
       </Fragment>
     );
   }
