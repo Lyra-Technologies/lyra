@@ -2124,9 +2124,7 @@ class MainContainer extends Component {
   componentDidMount() {
     // fetch the data from local storage, set in the App component
     chrome.storage.local.get(['data'], res => {
-      this.setState({ storageData: res['data'] }, () =>
-        console.log('storage data:: ', this.state.storageData)
-      );
+      this.setState({ storageData: res['data'] });
     });
   }
 

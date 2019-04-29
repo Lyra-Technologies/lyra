@@ -16,6 +16,7 @@ if (!started) {
   _timeout = setTimeout(init, 500);
 } else {
   clearTimeout(_timeout);
+  // send data to content script
   window.postMessage({
     type: 'inject',
     message: JSON.stringify(window.__APOLLO_CLIENT__.cache.data.data)

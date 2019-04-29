@@ -1,6 +1,6 @@
-import React, { Component, Fragment } from 'react';
-// import Header from './components/Header';
+import React, { Component } from 'react';
 import MainContainer from './containers/MainContainer';
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -42,21 +42,15 @@ class App extends Component {
     portToScripts.onMessage.addListener(message => {
       // filter incoming messages
       if (message.type === 'toRender' && message.message) {
-        // parse the data received from injected script
+        // parse the data received from injected script forwarded by the background script
         const parsed = JSON.parse(message.message);
-        chrome.storage.local.set({ ['data']: parsed }, () => {
-          console.log('storage set');
-        });
+        chrome.storage.local.set({ ['data']: parsed });
       }
     });
   }
 
   render() {
-    return (
-      <Fragment>
-        <MainContainer />
-      </Fragment>
-    );
+    return <MainContainer />;
   }
 }
 

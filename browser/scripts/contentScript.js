@@ -23,10 +23,12 @@ chrome.runtime.onMessage.addListener((message, sender, res) => {
   }
 });
 
+// listen for data sent from injected script
 window.addEventListener('message', message => {
   if (!message.data) return;
   if (message.data.type == 'inject') {
     const apolloCache = message.data.message;
+    // send data to background script
     chrome.runtime.sendMessage({
       type: 'content',
       message: apolloCache

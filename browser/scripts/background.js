@@ -4,6 +4,8 @@ let initialized = false;
 chrome.runtime.onConnect.addListener(port => {
   console.log({ connections });
   if (port.name === 'devtool') {
+    // listen for the 'initialize devtool' message and store the port object
+    // in the connections object with the tabId as the key
     let extensionListener = message => {
       if (message.message === 'initialize devtool' && message.tabId) {
         initialized = true;
@@ -18,11 +20,14 @@ chrome.runtime.onConnect.addListener(port => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender, response) => {
+  // listen for a message from the content script
   if (message.type === 'content') {
     // && initialized ?
     if (sender.tab) {
+      // if the tabId that dispatched the message is in the connections object
       const tabId = sender.tab.id;
       if (tabId in connections) {
+        // send the data to the devtool
         connections[tabId].postMessage({
           type: 'toRender',
           message: message.message
