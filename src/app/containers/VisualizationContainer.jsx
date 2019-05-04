@@ -93,7 +93,7 @@ const VisualizationContainer = props => {
   };
 
   return (
-    <div style={{ margin: '10px' }}>
+    <div style={{ padding: '10px' }}>
       <SearchBoxWithDropdown
         handleOnChange={handleOnChange}
         handleOnClick={handleOnClick}
