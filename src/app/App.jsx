@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import MainContainer from './containers/MainContainer';
+import VisualizationContainer from './containers/VisualizationContainer';
 
 class App extends Component {
   constructor(props) {
@@ -7,33 +8,37 @@ class App extends Component {
     this.state = {
       initialized: false
     };
-
-    this.portToScripts = null;
-
-    const onPanelShown = () => {
-      // chrome.runtime.sendMessage('lyra-panel-shown');
-      // this.setState({ panelShown: true });
-      const { tabId } = chrome.devtools.inspectedWindow;
-
-      if (!this.state.initialized) {
-        this.portToScripts.postMessage({
-          tabId: tabId,
-          message: 'initialize devtool'
-        });
-        this.setState({ initialized: true });
-      }
-    };
-
-    // const onPanelHidden = () => {
-    //   chrome.runtime.sendMessage('lyra-panel-hidden');
-    //   this.setState({ panelShown: false });
-    // };
-
-    chrome.devtools.panels.create('Lyra', null, 'devtools.html', panel => {
-      panel.onShown.addListener(onPanelShown);
-      // panel.onHidden.addListener(onPanelHidden);
-    });
   }
+  //   this.portToScripts = null;
+
+  //   const onPanelShown = () => {
+  //     // chrome.runtime.sendMessage('lyra-panel-shown');
+  //     // this.setState({ panelShown: true });
+  //     const { tabId } = chrome.devtools.inspectedWindow;
+
+  //     if (!this.state.initialized) {
+  //       this.portToScripts.postMessage({
+  //         tabId: tabId,
+  //         message: 'initialize devtool',
+  //       });
+  //       this.setState({ initialized: true });
+  //     }
+  //   };
+
+  //   // const onPanelHidden = () => {
+  //   //   chrome.runtime.sendMessage('lyra-panel-hidden');
+  //   //   this.setState({ panelShown: false });
+  //   // };
+
+  //   chrome.devtools.panels.create('Lyra', null, 'devtools.html', panel => {
+  //     panel.onShown.addListener(onPanelShown);
+  //     // panel.onHidden.addListener(onPanelHidden);
+  //   });
+  // }
+
+  // componentDidMount() {
+  //   const portToScripts = chrome.runtime.connect({ name: 'devtool' }); // returns a port object
+  //   this.portToScripts = portToScripts;
 
   componentDidMount() {
     const portToScripts = chrome.runtime.connect({ name: 'devtool' }); // returns a port object
