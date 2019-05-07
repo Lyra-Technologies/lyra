@@ -8,8 +8,8 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
   }
 
   var margin = { top: 20, right: 90, bottom: 30, left: 90 },
-    width = window.innerWidth - margin.left - margin.right,
-    height = window.innerHeight - margin.top - margin.bottom;
+    width = 1200 - margin.left - margin.right,
+    height = 1000 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   // appends a 'group' element to 'svg'
@@ -49,21 +49,29 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       d._children = d.children;
       d._children.forEach(collapse);
       d.children = null;
+      console.log(d);
     }
   }
 
   function update(source) {
     // Assigns the x and y position for the nodes
     var treeData = treemap(root);
+    let maxY = 0;
+    let maxX = 0;
 
     // Compute the new tree layout.
     var nodes = treeData.descendants(),
       links = treeData.descendants().slice(1);
 
-    // Normalize for fixed-depth.
+    // Normalize for fixed-depth and get maxWidth and maxHeight.
     nodes.forEach(d => {
       d.y = d.depth * 180;
+      maxY = d.y > maxY ? d.y : maxY;
+      maxX = d.x > maxY ? d.x : maxX;
     });
+
+    document.querySelector('svg').style.width =
+      (maxY + margin.right + margin.left).toString() + 'px';
 
     // ****************** Nodes section ***************************
 
@@ -212,6 +220,8 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       d.x0 = d.x;
       d.y0 = d.y;
     });
+
+    // resize the svg
 
     // Creates a curved (diagonal) path from parent to the child nodes
     function diagonal(s, d) {
