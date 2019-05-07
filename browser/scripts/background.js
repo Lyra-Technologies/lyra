@@ -28,6 +28,7 @@ chrome.runtime.onMessage.addListener((message, sender, response) => {
       const tabId = sender.tab.id;
       if (tabId in connections) {
         // send the data to the devtool
+        console.log('sending data to devtool, in toRender', message);
         connections[tabId].postMessage({
           type: 'toRender',
           message: message.message

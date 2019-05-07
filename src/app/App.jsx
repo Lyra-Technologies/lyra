@@ -5,7 +5,8 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      initialized: false
+      initialized: false,
+      index: 0
     };
 
     this.portToScripts = null;
@@ -15,13 +16,14 @@ class App extends Component {
       // this.setState({ panelShown: true });
       const { tabId } = chrome.devtools.inspectedWindow;
 
-      if (!this.state.initialized) {
-        this.portToScripts.postMessage({
-          tabId: tabId,
-          message: 'initialize devtool'
-        });
-        this.setState({ initialized: true });
+      if (this.state.initialized) {
+        return;
       }
+      this.portToScripts.postMessage({
+        tabId: tabId,
+        message: 'initialize devtool'
+      });
+      this.setState({ initialized: true });
     };
 
     // const onPanelHidden = () => {
@@ -36,21 +38,35 @@ class App extends Component {
   }
 
   componentDidMount() {
+    const { tabId } = chrome.devtools.inspectedWindow;
     const portToScripts = chrome.runtime.connect({ name: 'devtool' }); // returns a port object
     this.portToScripts = portToScripts;
 
     portToScripts.onMessage.addListener(message => {
       // filter incoming messages
       if (message.type === 'toRender' && message.message) {
-        // parse the data received from injected script forwarded by the background script
-        const parsed = JSON.parse(message.message);
-        chrome.storage.local.set({ ['data']: parsed });
+        console.log('app receiving message', message.message);
+        chrome.storage.local.set(
+          { [this.state.index]: message.message },
+          () => {
+            console.log('chrome runtime error', chrome.runtime.lastError);
+            this.setState({ index: this.state.index + 1 }, () =>
+              console.log('state after setting storage', this.state)
+            );
+          }
+        );
       }
+    });
+    // flush chrome storage once the port disconnects
+    portToScripts.onDisconnect.addListener(() => {
+      chrome.storage.local.clear(() =>
+        console.log('Chrome storage has been cleared.')
+      );
     });
   }
 
   render() {
-    return <MainContainer />;
+    return <MainContainer index={this.state.index} />;
   }
 }
 

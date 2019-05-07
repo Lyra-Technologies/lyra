@@ -2108,11 +2108,12 @@ class MainContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeItem: 'None',
+      activeItem: null,
       stateData: randomStateData,
       cacheData: randomCacheData,
       initialData: {},
-      storageData: null
+      storageData: [],
+      currentIndex: null
     };
     this.handleItemClick = this.handleItemClick.bind(this);
   }
@@ -2122,14 +2123,22 @@ class MainContainer extends Component {
   }
 
   componentDidMount() {
-    // fetch the data from local storage, set in the App component
-    chrome.storage.local.get(['data'], res => {
-      this.setState({ storageData: res['data'] });
+    // fetch data from local storage, set in the App component
+    chrome.storage.local.get([`${this.props.index}`], res => {
+      this.setState({ storageData: res[`${this.props.index}`] }, data =>
+        console.log('in storage: ', this.state.storageData)
+      );
     });
+    // this.setState({ currentIndex: this.props.index });
+    // get(this.state.currentIndex).then(data => {
+    //   console.log('data from storage', data);
+    //   this.setState({ storageData: data });
+    // });
   }
 
   render() {
     const { activeItem, stateData, storageData, initialData } = this.state;
+    console.log('storage data in MainContainer render', this.state.storageData);
     let currentData = initialData;
     if (activeItem === 'CACHE') {
       currentData = storageData;
@@ -2138,12 +2147,10 @@ class MainContainer extends Component {
       currentData = stateData;
     }
 
-    {
-      /* <VisualizationContainer treeData={cacheData} /> */
-    }
     const cacheVisualizationContainer = () => (
-      <VisualizationContainer treeData={storageData} />
+      <VisualizationContainer treeData={storageData.inspector} />
     );
+
     const stateVisualizationContainer = () => (
       <VisualizationContainer treeData={stateData} />
     );
@@ -2211,13 +2218,14 @@ class MainContainer extends Component {
               />
             </Menu> */}
             <Divider fitted hidden />
+            {/* old theme : 'tomorrow' */}
             <ReactJson
               style={{ height: window.innerHeight }}
-              enableClipboard='false'
+              enableClipboard={false}
               indentWidth='2'
-              displayDataTypes={'false'}
-              theme='tomorrow'
-              src={{ currentData }}
+              displayDataTypes={false}
+              theme='threezerotwofour'
+              src={{ storageData }}
             />
           </Segment>
         </Grid.Column>
@@ -2244,9 +2252,8 @@ class MainContainer extends Component {
                 component={stateVisualizationContainer}
               />
             </Switch>
-            <hr />
             {/* <Tree treeData={currentData} /> */}
-            Insert Cache/State/ both component here
+            {/* Insert Cache/State/ both component here */}
           </Segment>
         </Grid.Column>
       </Grid>
