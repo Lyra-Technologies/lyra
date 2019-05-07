@@ -26,9 +26,12 @@ class MainContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeItem: 'None',
+      activeItem: null,
+      // stateData: randomStateData,
+      // cacheData: randomCacheData,
       initialData: {},
-      storageData: null
+      storageData: {},
+      currentIndex: null
     };
     this.handleItemClick = this.handleItemClick.bind(this);
   }
@@ -38,10 +41,17 @@ class MainContainer extends Component {
   }
 
   componentDidMount() {
-    // fetch the data from local storage, set in the App component
-    chrome.storage.local.get(['data'], res => {
-      this.setState({ storageData: res['data'] });
+    // fetch data from local storage, set in the App component
+    chrome.storage.local.get([`${this.props.index}`], res => {
+      this.setState({ storageData: res[`${this.props.index}`] }, data =>
+        console.log('in storage: ', this.state.storageData)
+      );
     });
+    // this.setState({ currentIndex: this.props.index });
+    // get(this.state.currentIndex).then(data => {
+    //   console.log('data from storage', data);
+    //   this.setState({ storageData: data });
+    // });
   }
 
   render() {
@@ -57,8 +67,9 @@ class MainContainer extends Component {
     }
 
     const cacheVisualizationContainer = () => (
-      <VisualizationContainer treeData={currentData} />
+      <VisualizationContainer treeData={storageData.inspector} />
     );
+
     const stateVisualizationContainer = () => (
       <VisualizationContainer treeData={currentData} />
     );
@@ -88,7 +99,7 @@ class MainContainer extends Component {
 
             <Link to='/cache'>
               <Menu.Item
-                name='Dog'
+                name='Cache'
                 icon='database'
                 active={activeItem === 'CACHE'}
                 onClick={this.handleItemClick}
@@ -117,13 +128,14 @@ class MainContainer extends Component {
             attached='bottom'
           >
             <Divider fitted hidden />
+            {/* old theme : 'tomorrow' */}
             <ReactJson
               style={{ height: window.innerHeight }}
-              enableClipboard='false'
+              enableClipboard={false}
               indentWidth='2'
-              displayDataTypes={'false'}
-              theme='tomorrow'
-              src={{ currentData }}
+              displayDataTypes={false}
+              theme='threezerotwofour'
+              src={storageData.inspector}
             />
           </Segment>
         </Grid.Column>

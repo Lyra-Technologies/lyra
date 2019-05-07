@@ -6,10 +6,37 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      initialized: false
+      initialized: false,
+      index: 0
     };
+
+    this.portToScripts = null;
+
+    const onPanelShown = () => {
+      // chrome.runtime.sendMessage('lyra-panel-shown');
+      // this.setState({ panelShown: true });
+      const { tabId } = chrome.devtools.inspectedWindow;
+
+      if (this.state.initialized) {
+        return;
+      }
+      this.portToScripts.postMessage({
+        tabId: tabId,
+        message: 'initialize devtool'
+      });
+      this.setState({ initialized: true });
+    };
+
+    // const onPanelHidden = () => {
+    //   chrome.runtime.sendMessage('lyra-panel-hidden');
+    //   this.setState({ panelShown: false });
+    // };
+
+    chrome.devtools.panels.create('Lyra', null, 'devtools.html', panel => {
+      panel.onShown.addListener(onPanelShown);
+      // panel.onHidden.addListener(onPanelHidden);
+    });
   }
-  //   this.portToScripts = null;
 
   //   const onPanelShown = () => {
   //     // chrome.runtime.sendMessage('lyra-panel-shown');
@@ -30,32 +57,39 @@ class App extends Component {
   //   //   this.setState({ panelShown: false });
   //   // };
 
-  //   chrome.devtools.panels.create('Lyra', null, 'devtools.html', panel => {
-  //     panel.onShown.addListener(onPanelShown);
-  //     // panel.onHidden.addListener(onPanelHidden);
-  //   });
-  // }
-
-  // componentDidMount() {
-  //   const portToScripts = chrome.runtime.connect({ name: 'devtool' }); // returns a port object
-  //   this.portToScripts = portToScripts;
-
   componentDidMount() {
+    const { tabId } = chrome.devtools.inspectedWindow;
     const portToScripts = chrome.runtime.connect({ name: 'devtool' }); // returns a port object
     this.portToScripts = portToScripts;
 
     portToScripts.onMessage.addListener(message => {
       // filter incoming messages
       if (message.type === 'toRender' && message.message) {
-        // parse the data received from injected script forwarded by the background script
-        const parsed = JSON.parse(message.message);
-        chrome.storage.local.set({ ['data']: parsed });
+        chrome.storage.local.set(
+          { [this.state.index]: message.message },
+          () => {
+            if (chrome.runtime.lastError)
+              console.log(
+                'Error setting Chrome storage',
+                chrome.runtime.lastError
+              );
+            this.setState({ index: this.state.index + 1 }, () =>
+              console.log('Chrome storage set, index has been incremented')
+            );
+          }
+        );
       }
+    });
+    // flush chrome storage once the port disconnects
+    portToScripts.onDisconnect.addListener(() => {
+      chrome.storage.local.clear(() =>
+        console.log('Chrome storage has been cleared.')
+      );
     });
   }
 
   render() {
-    return <MainContainer />;
+    return <MainContainer index={this.state.index} />;
   }
 }
 

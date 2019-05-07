@@ -2,19 +2,21 @@ import React, { useEffect } from 'react';
 import * as d3 from 'd3';
 
 const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
+  const svgElement = document.querySelector('svg');
   // Set the dimensions and margins of the diagram
-  if (document.querySelector('svg')) {
-    document.querySelector('svg').remove();
+  if (svgElement) {
+    console.log('svg element', svgElement);
+    svgElement.remove();
   }
 
-  var margin = { top: 20, right: 90, bottom: 30, left: 90 },
+  const margin = { top: 20, right: 90, bottom: 30, left: 90 },
     width = 1200 - margin.left - margin.right,
     height = 1000 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   // appends a 'group' element to 'svg'
   // moves the 'group' element to the top left margin
-  var svg = d3
+  const svg = d3
     .select('#svg')
     .append('svg')
     .attr('width', width + margin.right + margin.left)
@@ -22,12 +24,12 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
     .append('g')
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  var i = 0,
+  let i = 0,
     duration = 750,
     root;
 
   // declares a tree layout and assigns the size
-  var treemap = d3.tree().size([height, width]);
+  const treemap = d3.tree().size([height, width]);
 
   // Assigns parent, children, height, depth
   root = d3.hierarchy(treeData, function(d) {
@@ -55,12 +57,12 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
 
   function update(source) {
     // Assigns the x and y position for the nodes
-    var treeData = treemap(root);
+    const treeData = treemap(root);
     let maxY = 0;
     let maxX = 0;
 
     // Compute the new tree layout.
-    var nodes = treeData.descendants(),
+    const nodes = treeData.descendants(),
       links = treeData.descendants().slice(1);
 
     // Normalize for fixed-depth and get maxWidth and maxHeight.
@@ -76,12 +78,12 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
     // ****************** Nodes section ***************************
 
     // Update the nodes...
-    var node = svg.selectAll('g.node').data(nodes, d => {
+    const node = svg.selectAll('g.node').data(nodes, d => {
       return d.id || (d.id = ++i);
     });
 
     // Enter any new modes at the parent's previous position.
-    var nodeEnter = node
+    const nodeEnter = node
       .enter()
       .append('g')
       .attr('class', 'node')
@@ -126,7 +128,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       .attr('cursor', 'pointer');
 
     // UPDATE
-    var nodeUpdate = nodeEnter.merge(node);
+    const nodeUpdate = nodeEnter.merge(node);
 
     // Transition to the proper position for the node
     nodeUpdate
@@ -151,7 +153,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       });
 
     // Remove any exiting nodes
-    var nodeExit = node
+    const nodeExit = node
       .exit()
       .transition()
       .duration(duration)
@@ -169,17 +171,17 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
     // ****************** links section ***************************
 
     // Update the links...
-    var link = svg.selectAll('path.link').data(links, d => {
+    const link = svg.selectAll('path.link').data(links, d => {
       return d.id;
     });
 
     // Enter any new links at the parent's previous position.
-    var linkEnter = link
+    const linkEnter = link
       .enter()
       .insert('path', 'g')
       .attr('class', 'link')
       .attr('d', d => {
-        var o = { x: source.x0, y: source.y0 };
+        const o = { x: source.x0, y: source.y0 };
         return diagonal(o, o);
       })
       .style('opacity', 0.2)
@@ -188,7 +190,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       .style('stroke-width', '4px');
 
     // UPDATE
-    var linkUpdate = linkEnter.merge(link);
+    const linkUpdate = linkEnter.merge(link);
 
     // Transition back to the parent element position
     linkUpdate
@@ -202,12 +204,12 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       .style('stroke', 'E534AB');
 
     // Remove any exiting links
-    var linkExit = link
+    const linkExit = link
       .exit()
       .transition()
       .duration(duration)
       .attr('d', d => {
-        var o = { x: source.x, y: source.y };
+        const o = { x: source.x, y: source.y };
         return diagonal(o, o);
       })
       .style('opacity', 0.2)
@@ -258,16 +260,16 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             fill: #E534AB; 
             stroke: gray; 
             r: 7; 
-            opacity: 1`,
+            opacity: 1`
           );
           circle.__data__.oldFontSize = circle.parentNode.querySelector(
-            'text',
+            'text'
           ).style.fontSize;
           circle.__data__.oldWeight = circle.parentNode.querySelector(
-            'text',
+            'text'
           ).style.fontWeight;
           circle.__data__.oldOpacity = circle.parentNode.querySelector(
-            'text',
+            'text'
           ).style.opacity;
           circle.nextSibling.setAttribute(
             'style',
@@ -275,7 +277,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             color: #E534AB;
             font-size: 18px;
             font-weight: bold;
-            opacity: 1`,
+            opacity: 1`
           );
         }
       }
@@ -292,7 +294,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             fill: ${circle.__data__.oldColor};
             opacity: ${circle.__data__.oldOpacity};
             stroke: gray; 
-            r: 5;`,
+            r: 5;`
           );
           circle.nextSibling.setAttribute(
             'style',
@@ -300,7 +302,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             color: black; 
             font-size: ${circle.__data__.oldFontSize}; 
             opacity: ${circle.__data__.oldOpacity};
-            font-weight: ${circle.__data__.oldWeight};`,
+            font-weight: ${circle.__data__.oldWeight};`
           );
         }
       }
@@ -313,7 +315,7 @@ const Tree = props => {
     buildTree(props.treeData, false, props.isSearching);
   });
 
-  return <div id="svg" style={{ overflow: 'auto' }} />;
+  return <div id='svg' style={{ overflow: 'auto' }} />;
 };
 
 export default Tree;
