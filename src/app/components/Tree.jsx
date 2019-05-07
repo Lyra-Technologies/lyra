@@ -1,73 +1,82 @@
-import React from 'react';
-import { Component } from 'react';
+import React, { useEffect } from 'react';
 import * as d3 from 'd3';
 
-const buildTree = (treeData, collapseArray = null) => {
-  if (!collapseArray) {
-    // Set the dimensions and margins of the diagram
-    var margin = { top: 20, right: 90, bottom: 30, left: 90 },
-      width = window.innerWidth - margin.left - margin.right,
-      height = window.innerHeight - margin.top - margin.bottom;
-
-    // append the svg object to the body of the page
-    // appends a 'group' element to 'svg'
-    // moves the 'group' element to the top left margin
-    var svg = d3
-      .select('#svg')
-      .append('svg')
-      .attr('width', width + margin.right + margin.left)
-      .attr('height', height + margin.top + margin.bottom)
-      .append('g')
-      .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-    var i = 0,
-      duration = 750,
-      root;
-
-    // declares a tree layout and assigns the size
-    var treemap = d3.tree().size([height, width]);
-
-    // Assigns parent, children, height, depth
-    root = d3.hierarchy(treeData, function(d) {
-      return d.children;
-    });
-    root.x0 = height / 2;
-    root.y0 = 0;
-
-    // Collapse after the second level
-    root.children.forEach(collapse);
-
-    update(root);
+const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
+  // Set the dimensions and margins of the diagram
+  if (document.querySelector('svg')) {
+    document.querySelector('svg').remove();
   }
+
+  var margin = { top: 20, right: 90, bottom: 30, left: 90 },
+    width = 1200 - margin.left - margin.right,
+    height = 1000 - margin.top - margin.bottom;
+
+  // append the svg object to the body of the page
+  // appends a 'group' element to 'svg'
+  // moves the 'group' element to the top left margin
+  var svg = d3
+    .select('#svg')
+    .append('svg')
+    .attr('width', width + margin.right + margin.left)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+  var i = 0,
+    duration = 750,
+    root;
+
+  // declares a tree layout and assigns the size
+  var treemap = d3.tree().size([height, width]);
+
+  // Assigns parent, children, height, depth
+  root = d3.hierarchy(treeData, function(d) {
+    return d.children;
+  });
+  root.x0 = height / 2;
+  root.y0 = 0;
+
+  // Collapse after the second level
+  if (isCollapsed) root.children.forEach(collapse);
+
+  update(root);
+
   // collapses the nodes on the array
-  else {
-  }
+
   // Collapse the node and all it's children
   function collapse(d) {
     if (d.children) {
       d._children = d.children;
       d._children.forEach(collapse);
       d.children = null;
+      console.log(d);
     }
   }
 
   function update(source) {
     // Assigns the x and y position for the nodes
     var treeData = treemap(root);
+    let maxY = 0;
+    let maxX = 0;
 
     // Compute the new tree layout.
     var nodes = treeData.descendants(),
       links = treeData.descendants().slice(1);
 
-    // Normalize for fixed-depth.
-    nodes.forEach(function(d) {
+    // Normalize for fixed-depth and get maxWidth and maxHeight.
+    nodes.forEach(d => {
       d.y = d.depth * 180;
+      maxY = d.y > maxY ? d.y : maxY;
+      maxX = d.x > maxY ? d.x : maxX;
     });
+
+    document.querySelector('svg').style.width =
+      (maxY + margin.right + margin.left).toString() + 'px';
 
     // ****************** Nodes section ***************************
 
     // Update the nodes...
-    var node = svg.selectAll('g.node').data(nodes, function(d) {
+    var node = svg.selectAll('g.node').data(nodes, d => {
       return d.id || (d.id = ++i);
     });
 
@@ -76,7 +85,7 @@ const buildTree = (treeData, collapseArray = null) => {
       .enter()
       .append('g')
       .attr('class', 'node')
-      .attr('transform', function(d) {
+      .attr('transform', d => {
         return `translate(${source.y0},${source.x0})`;
       })
       .on('click', handleClick)
@@ -88,22 +97,31 @@ const buildTree = (treeData, collapseArray = null) => {
       .append('circle')
       .attr('class', 'node')
       .attr('r', 1e-6)
-      .style('fill', function(d) {
-        return d._children ? '280B9F' : '2A45A6';
+      .style('fill', '280B9F')
+      .attr('opacity', d => {
+        if (isSearching && !d.data.markedInSearch) {
+          return 0.5;
+        }
+        return 1;
       });
 
     // Add labels for the nodes
     nodeEnter
       .append('text')
       .attr('dy', '.35em')
-      .attr('x', function(d) {
-        return d.children || d._children ? -13 : 13;
+      .attr('x', d => {
+        return d.children || d._children ? -13 : -13;
       })
-      .attr('text-anchor', function(d) {
-        return d.children || d._children ? 'end' : 'start';
+      .attr('text-anchor', d => {
+        return d.children || d._children ? 'end' : 'end';
       })
-      .text(function(d) {
+      .text(d => {
         return d.data.name;
+      })
+      .attr('style', d => {
+        if (!isSearching) return `opacity: 1; font-weight: normal`;
+        if (d.data.markedInSearch) return `opacity: 1; font-weight: bold`;
+        return `opacity: 0.5; font-weight: normal`;
       })
       .attr('cursor', 'pointer');
 
@@ -114,7 +132,7 @@ const buildTree = (treeData, collapseArray = null) => {
     nodeUpdate
       .transition()
       .duration(duration)
-      .attr('transform', function(d) {
+      .attr('transform', d => {
         return 'translate(' + d.y + ',' + d.x + ')';
       });
 
@@ -122,18 +140,22 @@ const buildTree = (treeData, collapseArray = null) => {
     nodeUpdate
       .select('circle.node')
       .attr('r', 5)
-      .style('fill', function(d) {
-        return d._children ? '280B9F' : '2A45A6';
-      })
+      .style('fill', '280B9F')
       .style('stroke', 'gray')
-      .attr('cursor', 'pointer');
+      .attr('cursor', 'pointer')
+      .attr('opacity', d => {
+        if (isSearching && !d.data.markedInSearch) {
+          return 0.5;
+        }
+        return 1;
+      });
 
     // Remove any exiting nodes
     var nodeExit = node
       .exit()
       .transition()
       .duration(duration)
-      .attr('transform', function(d) {
+      .attr('transform', d => {
         return 'translate(' + source.y + ',' + source.x + ')';
       })
       .remove();
@@ -147,7 +169,7 @@ const buildTree = (treeData, collapseArray = null) => {
     // ****************** links section ***************************
 
     // Update the links...
-    var link = svg.selectAll('path.link').data(links, function(d) {
+    var link = svg.selectAll('path.link').data(links, d => {
       return d.id;
     });
 
@@ -156,7 +178,7 @@ const buildTree = (treeData, collapseArray = null) => {
       .enter()
       .insert('path', 'g')
       .attr('class', 'link')
-      .attr('d', function(d) {
+      .attr('d', d => {
         var o = { x: source.x0, y: source.y0 };
         return diagonal(o, o);
       })
@@ -172,7 +194,7 @@ const buildTree = (treeData, collapseArray = null) => {
     linkUpdate
       .transition()
       .duration(duration)
-      .attr('d', function(d) {
+      .attr('d', d => {
         return diagonal(d, d.parent);
       })
       .style('opacity', 0.2)
@@ -184,7 +206,7 @@ const buildTree = (treeData, collapseArray = null) => {
       .exit()
       .transition()
       .duration(duration)
-      .attr('d', function(d) {
+      .attr('d', d => {
         var o = { x: source.x, y: source.y };
         return diagonal(o, o);
       })
@@ -194,10 +216,12 @@ const buildTree = (treeData, collapseArray = null) => {
       .remove();
 
     // Store the old positions for transition.
-    nodes.forEach(function(d) {
+    nodes.forEach(d => {
       d.x0 = d.x;
       d.y0 = d.y;
     });
+
+    // resize the svg
 
     // Creates a curved (diagonal) path from parent to the child nodes
     function diagonal(s, d) {
@@ -227,19 +251,31 @@ const buildTree = (treeData, collapseArray = null) => {
       for (let circle of circles) {
         if (d.x === circle.__data__.x && d.y === circle.__data__.y) {
           circle.__data__.oldColor = circle.style.fill;
+          circle.__data__.oldOpacity = circle.style.opacity;
           circle.setAttribute(
             'style',
-            'transition: 0.3s; fill: #E534AB; stroke: gray; r: 7',
+            `transition: 0.3s; 
+            fill: #E534AB; 
+            stroke: gray; 
+            r: 7; 
+            opacity: 1`,
           );
           circle.__data__.oldFontSize = circle.parentNode.querySelector(
             'text',
           ).style.fontSize;
+          circle.__data__.oldWeight = circle.parentNode.querySelector(
+            'text',
+          ).style.fontWeight;
+          circle.__data__.oldOpacity = circle.parentNode.querySelector(
+            'text',
+          ).style.opacity;
           circle.nextSibling.setAttribute(
             'style',
             `transition: 0.3s;
             color: #E534AB;
             font-size: 18px;
-            font-weight: bold`,
+            font-weight: bold;
+            opacity: 1`,
           );
         }
       }
@@ -254,14 +290,17 @@ const buildTree = (treeData, collapseArray = null) => {
             'style',
             `transition: 0.3s; 
             fill: ${circle.__data__.oldColor};
-            stroke: gray; r: 5`,
+            opacity: ${circle.__data__.oldOpacity};
+            stroke: gray; 
+            r: 5;`,
           );
           circle.nextSibling.setAttribute(
             'style',
             `transition: 0.3s; 
             color: black; 
             font-size: ${circle.__data__.oldFontSize}; 
-            font-weight: normal`,
+            opacity: ${circle.__data__.oldOpacity};
+            font-weight: ${circle.__data__.oldWeight};`,
           );
         }
       }
@@ -269,22 +308,12 @@ const buildTree = (treeData, collapseArray = null) => {
   }
 };
 
-class Tree extends Component {
-  constructor() {
-    super();
-  }
+const Tree = props => {
+  useEffect(() => {
+    buildTree(props.treeData, false, props.isSearching);
+  });
 
-  componentDidMount() {
-    buildTree(this.props.treeData);
-  }
-
-  shouldComponentUpdate() {
-    return false;
-  }
-
-  render() {
-    return <div id="svg"> </div>;
-  }
-}
+  return <div id="svg" style={{ overflow: 'auto' }} />;
+};
 
 export default Tree;

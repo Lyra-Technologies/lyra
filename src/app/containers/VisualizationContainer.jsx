@@ -1,16 +1,17 @@
-import React, { Component, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Tree from '../components/Tree';
 import SearchBoxWithDropdown from '../components/SearchBoxWithDropdown';
 import { Icon, Label } from 'semantic-ui-react';
+// import { AsyncResource } from 'async_hooks';
 
 const VisualizationContainer = props => {
-  // let [fullTree, setFullTree] = useState(parse('root', props.treeData));
+  let [fullTree, setFullTree] = useState(parse('root', props.treeData));
   let [newTree, setNewTree] = useState(null);
   let [inputOnTag, setInputOnTag] = useState(null);
   let [filterOnTag, setFilterOnTag] = useState(null);
   let [input, setInput] = useState(null);
   let [filter, setFilter] = useState('key');
-  let [search, setSearch] = useState(false);
+  let [isSearching, setIsSearching] = useState(false);
 
   const handleOnChange = event => {
     let eventValue = event;
@@ -23,32 +24,27 @@ const VisualizationContainer = props => {
     let eventValue = event;
     let keyCode = eventValue.keyCode;
     if (keyCode === 13) handleOnClick();
+    else setInput(eventValue.target.value);
   };
 
   const handleOnClick = event => {
     if (input) {
-      console.log(input, ' ', filter);
-      createNewTree(fullTree, input);
-      setSearch(true);
+      setNewTree(markFound(fullTree, input));
+      setIsSearching(true);
       setInputOnTag(input);
       setFilterOnTag(filter);
     } else handleClearSearch();
   };
 
   const handleClearSearch = () => {
-    setSearch(false);
+    setIsSearching(false);
   };
 
   // Tree structure from data
   function Data(name) {
     this.name = name;
+    this.markedInSearch = false;
   }
-
-  // add child function not working when recursing through data ...
-  Data.prototype.addChild = function(childObj) {
-    this.children.push(childObj);
-    return this.children.length;
-  };
 
   /**
    * Naive parser that returns an object fitted for D3 rendering
@@ -73,23 +69,14 @@ const VisualizationContainer = props => {
     return result;
   }
 
-  const createNewTree = (fullTree, input) => {
-    for (let key in fullTree) {
-      if ((!contains(fullTree[key]), input)) delete fullTree[key];
-    }
-    return fullTree;
-  };
-
-  const contains = (tree, input) => {
-    for (let obj of tree) {
-      if (obj.name.match(`/${input}/g`)) return true;
-      else if (obj.children) {
-        for (let index in obj.children) {
-          if (constains(obj.children[index])) return true;
-        }
+  const markFound = (tree, input) => {
+    tree.markedInSearch = RegExp(input, 'g').test(tree.name) ? true : false;
+    if (tree.children) {
+      for (let index in tree.children) {
+        markFound(tree.children[index], input);
       }
     }
-    return false;
+    return tree;
   };
 
   return (
@@ -100,17 +87,17 @@ const VisualizationContainer = props => {
         handleKeyPress={handleKeyPress}
         searchWord={input}
       />
-      {search ? (
+      {isSearching ? (
         <Label as="a" color="pink">
           {filterOnTag + ' : ' + inputOnTag}
           <Icon name="delete" onClick={handleClearSearch} />
         </Label>
       ) : null}
-      <Tree
-        treeData={
-          search ? parse('root', newTree) : parse('root', props.treeData)
-        }
-      />
+      {isSearching ? (
+        <Tree treeData={newTree} isSearching={isSearching} />
+      ) : (
+        <Tree treeData={fullTree} isSearching={isSearching} />
+      )}
     </div>
   );
 };
