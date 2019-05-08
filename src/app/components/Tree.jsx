@@ -3,8 +3,11 @@ import * as d3 from 'd3';
 
 const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
   // Set the dimensions and margins of the diagram
-  if (document.querySelector('svg')) {
-    document.querySelector('svg').remove();
+  let temp = document.querySelectorAll('svg');
+  if (temp.length) {
+    temp.forEach(el => {
+      el.remove();
+    });
   }
 
   var margin = { top: 20, right: 90, bottom: 30, left: 90 },
