@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import Tree from '../components/Tree';
 import SearchBoxWithDropdown from '../components/SearchBoxWithDropdown';
 import { Icon, Label } from 'semantic-ui-react';
@@ -35,20 +35,37 @@ const VisualizationContainer = props => {
       setSearchKeyValue(tempSearchKeyValue);
       textBox.value = '';
       textBox.focus();
-    } else handleClearSearch();
+    }
+    // else handleClearSearch();
   };
 
-  useEffect(() => {
-    let inputSearch = searchKeyValue.map(element => element[1]).join('|');
-    setNewTree(markFound(fullTree, inputSearch));
-    setIsSearching(true);
-  }, [searchKeyValue]);
+  useLayoutEffect(() => {
+    // separating key searches
+    if (searchKeyValue.length) {
+      let inputKeys = searchKeyValue
+        .filter(element => element[0] === 'key')
+        .map(element => element[1])
+        .join('|');
+      // separating value searches
+      let inputValues = searchKeyValue
+        .filter(element => element[0] === 'value')
+        .map(element => element[1])
+        .join('|');
+      setNewTree(markFound(fullTree, inputKeys, inputValues));
+      setIsSearching(true);
+      console.log(newTree);
+    } else setIsSearching(false);
+    // return handleClearSearch;
+  }, [searchKeyValue.length, newTree, isSearching]);
 
   const handleRemoveKeyword = event => {
     let eventValue = event;
-    let valueToRemove = eventValue.target.parentNode.innerText.split(' : ')[1];
+    let valueToRemove = eventValue.target.parentNode.innerText.split(' : ');
     for (let index = 0; index < searchKeyValue.length; index++) {
-      if (valueToRemove === searchKeyValue[index][1]) {
+      if (
+        valueToRemove[1] === searchKeyValue[index][1] &&
+        valueToRemove[0] === searchKeyValue[index][0]
+      ) {
         setSearchKeyValue(
           [].concat(
             searchKeyValue.slice(0, index),
@@ -93,13 +110,29 @@ const VisualizationContainer = props => {
     return result;
   }
 
-  const markFound = (tree, inputKeywords) => {
-    tree.markedInSearch = RegExp(inputKeywords, 'g').test(tree.name)
-      ? true
-      : false;
+  const markFound = (tree, inputKeys, inputValues) => {
+    console.log(inputKeys, inputValues);
+    if (inputKeys) {
+      tree.markedInSearch = RegExp(`(${inputKeys})`, 'g').test(tree.name)
+        ? true
+        : false;
+    }
+    if (inputValues) {
+      tree.markedInSearch = RegExp(`(${inputValues})`, 'g').test(tree.value)
+        ? true
+        : false;
+    }
+    console.log(
+      inputKeys,
+      tree.name,
+      RegExp(`(${inputValues})`, 'g').test(tree.value),
+      inputValues,
+      tree.value,
+      RegExp(`(${inputKeys})`, 'g').test(tree.name),
+    );
     if (tree.children) {
       for (let index in tree.children) {
-        markFound(tree.children[index], inputKeywords);
+        markFound(tree.children[index], inputKeys, inputValues);
       }
     }
     return tree;
