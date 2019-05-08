@@ -1125,13 +1125,14 @@ class MainContainer extends Component {
       rewindElHeight,
     } = this.state;
     console.log('inside render', storageData);
-
+    //switch out data for storagedata. statedata used here to avoid lag with storage
     let currentData = stateData;
     if (activeItem === 'CACHE') {
       currentData = stateData;
     }
     if (activeItem === 'STATE') {
-      currentData = stateData;
+      // currentData = storageData;
+      currentData = variable;
     }
 
     let viewHeight = window.innerHeight - menuHeight - rewindElHeight;

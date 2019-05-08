@@ -5,7 +5,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      initialized: false
+      initialized: false,
     };
 
     this.portToScripts = null;
@@ -18,7 +18,7 @@ class App extends Component {
       if (!this.state.initialized) {
         this.portToScripts.postMessage({
           tabId: tabId,
-          message: 'initialize devtool'
+          message: 'initialize devtool',
         });
         this.setState({ initialized: true });
       }

@@ -7,21 +7,15 @@ const options = [
 ];
 
 const SearchBoxWithDropdown = props => {
-  const [searchType, setSearchType] = useState('key');
-  const [inputText, setInputText] = useState('');
-
-  // document.addEventListener('keydown', props.handleKeyPress);
-
   return (
     <Input
       onKeyUp={props.handleKeyPress}
       className="inputSearch"
       type="text"
       placeholder="Search..."
-      onChange={props.handleOnChange}
       action
     >
-      <input />
+      <input id="inputTextBox" />
       <Select
         compact
         options={options}
