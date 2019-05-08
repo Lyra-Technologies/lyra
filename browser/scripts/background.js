@@ -44,7 +44,11 @@ chrome.runtime.onMessage.addListener((message, sender, response) => {
 });
 
 // remove closed connections from the connections object
-chrome.tabs.onRemoved.addListener(tabId => delete connections[tabId]);
+chrome.tabs.onRemoved.addListener(tabId => {
+  delete connections[tabId];
+  // clear Chrome storage
+  chrome.storage.local.clear();
+});
 
 // add an event listener for tab changes
 chrome.tabs.onUpdated.addListener((tabId, info) => {

@@ -37,10 +37,7 @@ function injectScript(file) {
 chrome.runtime.onMessage.addListener((message, sender, res) => {
   const injected = document.getElementById('injectedScript');
   // check if there's already an injected script tag and reinsert if needed
-  if (
-    message.message === 'initialize devtool' ||
-    (message.message === 'request data' && !injected)
-  ) {
+  if (message.message === 'initialize devtool' && !injected) {
     injectScript(chrome.extension.getURL('scripts/inject.js'));
   }
   // listen for tab changes and reinject script if needed
@@ -53,9 +50,8 @@ chrome.runtime.onMessage.addListener((message, sender, res) => {
 window.addEventListener('message', message => {
   if (!message.data) return;
   if (message.data.type == 'inject') {
-    console.log('receiving message from injected script', message);
     const apolloCache = message.data.message;
-    // only send different data on to the devtool
+    // only send if next snapshot is different from previous
     if (JSON.stringify(apolloCache) === JSON.stringify(prevData)) return;
     else {
       prevData = apolloCache;
@@ -70,6 +66,7 @@ window.addEventListener('message', message => {
   }
 });
 
+// install a MutationObserver instance on the window object
 const target = document.body;
 
 const config = {
@@ -80,7 +77,6 @@ const config = {
 };
 
 function subscriber(mutations) {
-  // let timeout;
   let shouldUpdate = true;
 
   if (mutations.length) {

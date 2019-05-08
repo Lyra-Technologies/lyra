@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import MainContainer from './containers/MainContainer';
-import VisualizationContainer from './containers/VisualizationContainer';
 
 class App extends Component {
   constructor(props) {
@@ -25,6 +24,9 @@ class App extends Component {
         message: 'initialize devtool'
       });
       this.setState({ initialized: true });
+
+      // reload the extension
+      // chrome.runtime.reload();
     };
 
     // const onPanelHidden = () => {
@@ -38,25 +40,6 @@ class App extends Component {
     });
   }
 
-  //   const onPanelShown = () => {
-  //     // chrome.runtime.sendMessage('lyra-panel-shown');
-  //     // this.setState({ panelShown: true });
-  //     const { tabId } = chrome.devtools.inspectedWindow;
-
-  //     if (!this.state.initialized) {
-  //       this.portToScripts.postMessage({
-  //         tabId: tabId,
-  //         message: 'initialize devtool',
-  //       });
-  //       this.setState({ initialized: true });
-  //     }
-  //   };
-
-  //   // const onPanelHidden = () => {
-  //   //   chrome.runtime.sendMessage('lyra-panel-hidden');
-  //   //   this.setState({ panelShown: false });
-  //   // };
-
   componentDidMount() {
     const { tabId } = chrome.devtools.inspectedWindow;
     const portToScripts = chrome.runtime.connect({ name: 'devtool' }); // returns a port object
@@ -65,25 +48,35 @@ class App extends Component {
     portToScripts.onMessage.addListener(message => {
       // filter incoming messages
       if (message.type === 'toRender' && message.message) {
+        // const parsed = parse(message.message.inspector);
+        // console.log('parsed inspector data', parsed);
+        console.log(
+          'app component receiving data from injected script',
+          message.message
+        );
         chrome.storage.local.set(
-          { [this.state.index]: message.message },
+          { [`${this.state.index}`]: message.message.inspector },
           () => {
+            // handle errors in setting Chrome storage
             if (chrome.runtime.lastError)
-              console.log(
+              console.error(
                 'Error setting Chrome storage',
                 chrome.runtime.lastError
               );
             this.setState({ index: this.state.index + 1 }, () =>
-              console.log('Chrome storage set, index has been incremented')
+              console.log(
+                'Chrome storage set, index has been incremented',
+                this.state.index
+              )
             );
           }
         );
       }
     });
-    // flush chrome storage once the port disconnects
+    // flush Chrome storage once the port disconnects
     portToScripts.onDisconnect.addListener(() => {
       chrome.storage.local.clear(() =>
-        console.log('Chrome storage has been cleared.')
+        console.info('Chrome storage has been cleared.')
       );
     });
   }

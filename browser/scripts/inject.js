@@ -52,12 +52,10 @@ function init() {
         message: data
       });
       return;
-    } else {
-      console.log('Apollo Client instance not found.');
     }
+  } else {
+    console.log('Install Apollo devtools to run Lyra.');
   }
-
-  console.log('Install Apollo devtools to run this app.');
 }
 
 init();

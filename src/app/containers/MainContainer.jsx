@@ -1,8 +1,5 @@
-import Tree from '../components/Tree';
 import ReactJson from 'react-json-view';
 import { Link, Route, Switch } from 'react-router-dom';
-import state from '../displayComponents/state';
-import cache from '../displayComponents/cache';
 import React, { Component } from 'react';
 
 import {
@@ -18,56 +15,93 @@ import {
 } from 'semantic-ui-react';
 import VisualizationContainer from './VisualizationContainer';
 
-// const treeObject = data => {
-//   <Tree treeData={data} />;
-// };
-
 class MainContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeItem: null,
-      // stateData: randomStateData,
-      // cacheData: randomCacheData,
+      activeItem: 'CACHE',
       initialData: {},
       storageData: {},
       currentIndex: null
     };
+
     this.handleItemClick = this.handleItemClick.bind(this);
+    // this.handleForwardClick = this.handleForwardClick.bind(this);
+    // this.handleBackClick = this.handleBackClick.bind(this);
   }
 
   handleItemClick(e, { name }) {
     this.setState({ activeItem: name });
   }
 
+  // handleForwardClick() {
+  //   this.setState((prevState, props) => {
+  //     if (prevState.currentIndex <= props.index) {
+  //       console.log(
+  //         'in handleForwardClick, about to increment currentIndex',
+  //         prevState.currentIndex
+  //       );
+  //       return { currentIndex: prevState.currentIndex + 1 };
+  //     } else {
+  //       // #TODO make the button inactive
+  //       // index is now out of range
+  //       console.log('in handleForwardClick, index out of range');
+  //       return { currentIndex: props.index };
+  //     }
+  //   });
+  // }
+
+  // handleBackClick() {
+  //   this.setState((prevState, props) => {
+  //     if (prevState.currentIndex > 1) {
+  //       console.log(
+  //         'in handleBackClick, about to decrement currentIndex',
+  //         prevState.currentIndex
+  //       );
+  //       return { currentIndex: prevState.currentIndex - 1 };
+  //     } else {
+  //       // #TODO make the button inactive
+  //       // the user shouldn't be able to go back once the index reaches 0
+  //       console.log('in handleBackClick, index out of range');
+  //       return { currentIndex: props.index };
+  //     }
+  //   });
+  // }
+
   componentDidMount() {
-    // fetch data from local storage, set in the App component
+    // fetch data from Chrome storage, set in the App component
+    console.log('in cDM in MainCointainer, this.props.index', this.props.index);
     chrome.storage.local.get([`${this.props.index}`], res => {
-      this.setState({ storageData: res[`${this.props.index}`] }, data =>
-        console.log('in storage: ', this.state.storageData)
-      );
+      this.setState({
+        storageData: res[`${this.props.index}`],
+        currentIndex: this.props.index
+      });
     });
-    // this.setState({ currentIndex: this.props.index });
-    // get(this.state.currentIndex).then(data => {
-    //   console.log('data from storage', data);
-    //   this.setState({ storageData: data });
-    // });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.index !== this.props.index) {
+      chrome.storage.local.get([`${this.props.index}`], res => {
+        this.setState({
+          storageData: res[`${this.props.index}`],
+          currentIndex: this.props.index
+        });
+      });
+    }
   }
 
   render() {
     const { activeItem, storageData, initialData } = this.state;
     let currentData = initialData;
     if (activeItem === 'CACHE') {
-      // currentData = storageData;
-      currentData = variable;
+      currentData = storageData;
     }
     if (activeItem === 'STATE') {
-      // currentData = storageData;
-      currentData = variable;
+      // currentData = variable;
     }
 
     const cacheVisualizationContainer = () => (
-      <VisualizationContainer treeData={storageData.inspector} />
+      <VisualizationContainer treeData={storageData} />
     );
 
     const stateVisualizationContainer = () => (
@@ -109,7 +143,7 @@ class MainContainer extends Component {
             <Link to='/state'>
               <Menu.Item
                 icon='database'
-                name='STATE'
+                name='State'
                 active={activeItem === 'STATE'}
                 onClick={this.handleItemClick}
               />
@@ -128,14 +162,13 @@ class MainContainer extends Component {
             attached='bottom'
           >
             <Divider fitted hidden />
-            {/* old theme : 'tomorrow' */}
             <ReactJson
               style={{ height: window.innerHeight }}
               enableClipboard={false}
               indentWidth='2'
               displayDataTypes={false}
               theme='threezerotwofour'
-              src={storageData.inspector}
+              src={{ storageData }}
             />
           </Segment>
         </Grid.Column>
@@ -149,8 +182,9 @@ class MainContainer extends Component {
               <Route path='/cache' component={cacheVisualizationContainer} />
               <Route path='/state' component={stateVisualizationContainer} />
             </Switch>
-            <hr />
           </Segment>
+          {/* <button onClick={this.handleBackClick}>Back</button>
+          <button onClick={this.handleForwardClick}>Forward</button> */}
         </Grid.Column>
       </Grid>
     );

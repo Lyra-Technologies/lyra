@@ -5,7 +5,6 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
   const svgElement = document.querySelector('svg');
   // Set the dimensions and margins of the diagram
   if (svgElement) {
-    console.log('svg element', svgElement);
     svgElement.remove();
   }
 
