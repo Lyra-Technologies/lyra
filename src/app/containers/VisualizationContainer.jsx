@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import Tree from '../components/Tree';
 import SearchBoxWithDropdown from '../components/SearchBoxWithDropdown';
 import { Icon, Label } from 'semantic-ui-react';
-// import { AsyncResource } from 'async_hooks';
 
 const VisualizationContainer = props => {
   let [fullTree, setFullTree] = useState(parse('root', props.treeData));
   let [newTree, setNewTree] = useState(null);
-  let [inputOnTag, setInputOnTag] = useState(null);
-  let [filterOnTag, setFilterOnTag] = useState(null);
+  let [searchKeyValue, setSearchKeyValue] = useState([]);
   let [input, setInput] = useState(null);
   let [filter, setFilter] = useState('key');
   let [isSearching, setIsSearching] = useState(false);
@@ -27,17 +25,60 @@ const VisualizationContainer = props => {
     else setInput(eventValue.target.value);
   };
 
-  const handleOnClick = event => {
-    if (input) {
-      setNewTree(markFound(fullTree, input));
+  const handleOnClick = () => {
+    let textBox = document.querySelector('#inputTextBox');
+    setInput(textBox.value);
+    if (textBox.value) {
+      // deep clone and update state
+      let tempSearchKeyValue = searchKeyValue.slice();
+      tempSearchKeyValue.push([filter, input]);
+      setSearchKeyValue(tempSearchKeyValue);
+      textBox.value = '';
+      textBox.focus();
+    }
+    // else handleClearSearch();
+  };
+
+  useLayoutEffect(() => {
+    // separating key searches
+    if (searchKeyValue.length) {
+      let inputKeys = searchKeyValue
+        .filter(element => element[0] === 'key')
+        .map(element => element[1])
+        .join('|');
+      // separating value searches
+      let inputValues = searchKeyValue
+        .filter(element => element[0] === 'value')
+        .map(element => element[1])
+        .join('|');
+      setNewTree(markFound(fullTree, inputKeys, inputValues));
       setIsSearching(true);
-      setInputOnTag(input);
-      setFilterOnTag(filter);
-    } else handleClearSearch();
+      console.log(newTree);
+    } else setIsSearching(false);
+    // return handleClearSearch;
+  }, [searchKeyValue.length, newTree, isSearching]);
+
+  const handleRemoveKeyword = event => {
+    let eventValue = event;
+    let valueToRemove = eventValue.target.parentNode.innerText.split(' : ');
+    for (let index = 0; index < searchKeyValue.length; index++) {
+      if (
+        valueToRemove[1] === searchKeyValue[index][1] &&
+        valueToRemove[0] === searchKeyValue[index][0]
+      ) {
+        setSearchKeyValue(
+          [].concat(
+            searchKeyValue.slice(0, index),
+            searchKeyValue.slice(index + 1, searchKeyValue.length),
+          ),
+        );
+      }
+    }
+    handleClearSearch();
   };
 
   const handleClearSearch = () => {
-    setIsSearching(false);
+    if (!searchKeyValue.length) setIsSearching(false);
   };
 
   // Tree structure from data
@@ -69,11 +110,29 @@ const VisualizationContainer = props => {
     return result;
   }
 
-  const markFound = (tree, input) => {
-    tree.markedInSearch = RegExp(input, 'g').test(tree.name) ? true : false;
+  const markFound = (tree, inputKeys, inputValues) => {
+    console.log(inputKeys, inputValues);
+    if (inputKeys) {
+      tree.markedInSearch = RegExp(`(${inputKeys})`, 'g').test(tree.name)
+        ? true
+        : false;
+    }
+    if (inputValues) {
+      tree.markedInSearch = RegExp(`(${inputValues})`, 'g').test(tree.value)
+        ? true
+        : false;
+    }
+    console.log(
+      inputKeys,
+      tree.name,
+      RegExp(`(${inputValues})`, 'g').test(tree.value),
+      inputValues,
+      tree.value,
+      RegExp(`(${inputKeys})`, 'g').test(tree.name),
+    );
     if (tree.children) {
       for (let index in tree.children) {
-        markFound(tree.children[index], input);
+        markFound(tree.children[index], inputKeys, inputValues);
       }
     }
     return tree;
@@ -87,12 +146,25 @@ const VisualizationContainer = props => {
         handleKeyPress={handleKeyPress}
         searchWord={input}
       />
-      {isSearching ? (
-        <Label as="a" color="pink">
-          {filterOnTag + ' : ' + inputOnTag}
-          <Icon name="delete" onClick={handleClearSearch} />
-        </Label>
-      ) : null}
+      {isSearching
+        ? searchKeyValue.map(element => {
+            let [filter, keyword] = element;
+            return (
+              <Label
+                as="a"
+                color="pink"
+                key={'label-' + filter + '-' + keyword}
+              >
+                {filter + ' : ' + keyword}
+                <Icon
+                  name="delete"
+                  onClick={handleRemoveKeyword}
+                  key={'icon-' + filter + '-' + keyword}
+                />
+              </Label>
+            );
+          })
+        : null}
       {isSearching ? (
         <Tree treeData={newTree} isSearching={isSearching} />
       ) : (
