@@ -15,7 +15,7 @@ const SearchBoxWithDropdown = props => {
       placeholder="Search..."
       action
     >
-      <input />
+      <input id="inputTextBox" />
       <Select
         compact
         options={options}
