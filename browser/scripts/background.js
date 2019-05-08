@@ -22,7 +22,6 @@ chrome.runtime.onConnect.addListener(port => {
 chrome.runtime.onMessage.addListener((message, sender, response) => {
   // listen for a message from the content script
   if (message.type === 'content') {
-    // && initialized ?
     if (sender.tab) {
       // if the tabId that dispatched the message is in the connections object
       const tabId = sender.tab.id;

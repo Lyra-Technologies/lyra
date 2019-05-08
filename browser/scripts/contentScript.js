@@ -1,6 +1,7 @@
 const port = chrome.runtime.connect({ name: 'content' });
 let injected = false;
 let prevData = [];
+let firstInject = true;
 
 function throttle(func, limit) {
   let lastFunc;
@@ -79,6 +80,12 @@ const config = {
 function subscriber(mutations) {
   let shouldUpdate = true;
 
+  if (firstInject) {
+    console.log('first injection of script');
+    injectScript(chrome.extension.getURL('scripts/inject.js'));
+    firstInject = false;
+  }
+
   if (mutations.length) {
     mutations.forEach(mutation => {
       if (mutation.addedNodes.length) {
@@ -102,7 +109,11 @@ function subscriber(mutations) {
     });
   }
   if (shouldUpdate) {
-    throttle(injectScript(chrome.extension.getURL('scripts/inject.js')), 1000);
+    console.log(
+      'mutation observer has detected a mutation, script will be injected'
+    );
+    // throttle(injectScript(chrome.extension.getURL('scripts/inject.js')), 1000);
+    injectScript(chrome.extension.getURL('scripts/inject.js'));
     shouldUpdate = false;
   }
 }

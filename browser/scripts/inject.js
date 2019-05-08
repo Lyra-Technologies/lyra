@@ -30,6 +30,7 @@
 /* using __APOLLO_DEVTOOLS_GLOBAL_HOOK__ rather than the __APOLLO_CLIENT__ global window object */
 
 function init() {
+  console.log('about to inject script');
   let client;
   let devtoolHook;
 

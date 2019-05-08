@@ -24,9 +24,6 @@ class App extends Component {
         message: 'initialize devtool'
       });
       this.setState({ initialized: true });
-
-      // reload the extension
-      // chrome.runtime.reload();
     };
 
     // const onPanelHidden = () => {
@@ -41,11 +38,11 @@ class App extends Component {
   }
 
   componentDidMount() {
-    const { tabId } = chrome.devtools.inspectedWindow;
     const portToScripts = chrome.runtime.connect({ name: 'devtool' }); // returns a port object
     this.portToScripts = portToScripts;
 
     portToScripts.onMessage.addListener(message => {
+      console.log('app component receiving data', message.message);
       // filter incoming messages
       if (message.type === 'toRender' && message.message) {
         // const parsed = parse(message.message.inspector);

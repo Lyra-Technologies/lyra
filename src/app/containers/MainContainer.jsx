@@ -1,37 +1,54 @@
 import ReactJson from 'react-json-view';
-import { Link, Route, Switch } from 'react-router-dom';
 import React, { Component } from 'react';
+import VisualizationContainer from './VisualizationContainer';
 
 import {
   Grid,
   Menu,
   Segment,
   Icon,
-  Input,
-  Divider,
   Image,
-  Container,
-  Label
+  Sidebar,
+  Form,
+  Label,
+  Button
 } from 'semantic-ui-react';
-import VisualizationContainer from './VisualizationContainer';
 
 class MainContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeItem: 'CACHE',
-      initialData: {},
-      storageData: {},
-      currentIndex: null
+      duration: 0,
+      rewindElHeight: 0,
+      menuHeight: 0,
+      visible: false,
+      storageData: {}
     };
 
-    this.handleItemClick = this.handleItemClick.bind(this);
     // this.handleForwardClick = this.handleForwardClick.bind(this);
     // this.handleBackClick = this.handleBackClick.bind(this);
+    this.handleSidebarClick = this.handleSidebarClick.bind(this);
+    this.handleRewindSlider = this.handleRewindSlider.bind(this);
+    this.handleRewindButton = this.handleRewindButton.bind(this);
+    this.handleForwardButton = this.handleForwardButton.bind(this);
   }
 
-  handleItemClick(e, { name }) {
-    this.setState({ activeItem: name });
+  handleSidebarClick() {
+    this.setState({
+      visible: !this.state.visible
+    });
+  }
+
+  handleRewindSlider(e, { value }) {
+    this.setState({ duration: value });
+  }
+
+  handleRewindButton() {
+    this.setState({ duration: this.state.duration - 1 });
+  }
+
+  handleForwardButton() {
+    this.setState({ duration: this.state.duration + 1 });
   }
 
   // handleForwardClick() {
@@ -69,17 +86,40 @@ class MainContainer extends Component {
   // }
 
   componentDidMount() {
+    // get height of menubar
+    const menuHeight = this.divElement.clientHeight;
+    this.setState({ menuHeight });
+    const rewindElHeight = this.rewindElement.clientHeight;
+    this.setState({ rewindElHeight });
+
     // fetch data from Chrome storage, set in the App component
-    console.log('in cDM in MainCointainer, this.props.index', this.props.index);
     chrome.storage.local.get([`${this.props.index}`], res => {
-      this.setState({
-        storageData: res[`${this.props.index}`],
-        currentIndex: this.props.index
-      });
+      if (chrome.runtime.lastError) {
+        console.error(
+          'Error getting from Chrome storage:',
+          chrome.runtime.lastError
+        );
+      }
+      this.setState(
+        {
+          storageData: res[`${this.props.index}`],
+          currentIndex: this.props.index
+        },
+        () =>
+          console.log(
+            'data fetched from store',
+            res[`${this.props.index}`],
+            'this.props.index',
+            this.props.index,
+            'this.state',
+            this.state
+          )
+      );
     });
   }
 
   componentDidUpdate(prevProps) {
+    console.log('in cDU, prevProps', prevProps);
     if (prevProps.index !== this.props.index) {
       chrome.storage.local.get([`${this.props.index}`], res => {
         this.setState({
@@ -91,102 +131,130 @@ class MainContainer extends Component {
   }
 
   render() {
-    const { activeItem, storageData, initialData } = this.state;
-    let currentData = initialData;
-    if (activeItem === 'CACHE') {
-      currentData = storageData;
-    }
-    if (activeItem === 'STATE') {
-      // currentData = variable;
-    }
+    const schemeColor = '#7113b9';
+    const {
+      duration,
+      storageData,
+      visible,
+      menuHeight,
+      rewindElHeight
+    } = this.state;
 
-    const cacheVisualizationContainer = () => (
-      <VisualizationContainer treeData={storageData} />
-    );
-
-    const stateVisualizationContainer = () => (
-      <VisualizationContainer treeData={currentData} />
-    );
-
+    let viewHeight = window.innerHeight - menuHeight - rewindElHeight;
     return (
-      <Grid style={{ marginTop: '0%' }}>
-        <Grid.Column color='teal' style={{ padding: 0 }} width={2}>
-          <Menu fluid vertical inverted pointing color='teal' icon='labeled'>
-            <Menu.Item>
-              <Image
-                verticalAlign='middle'
-                centered
-                src='https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Fadventuresofelguapo.files.wordpress.com%2F2014%2F06%2Ftroll-face.png&f=1'
-                circular
-                size='small'
-              />
-              {/* <Label
-                inverted
-                circular
-                color="orange"
-                size="huge"
-                attached="bottom"
-              >
-                LYRA
-              </Label> */}
-            </Menu.Item>
-
-            <Link to='/cache'>
-              <Menu.Item
-                name='Cache'
-                icon='database'
-                active={activeItem === 'CACHE'}
-                onClick={this.handleItemClick}
-              />
-            </Link>
-
-            <Link to='/state'>
-              <Menu.Item
-                icon='database'
-                name='State'
-                active={activeItem === 'STATE'}
-                onClick={this.handleItemClick}
-              />
-            </Link>
-          </Menu>
-        </Grid.Column>
-
-        <Grid.Column style={{ padding: 0 }} width={5}>
-          <Segment
+      <div style={{ height: viewHeight }}>
+        <div ref={divElement => (this.divElement = divElement)}>
+          <Menu
+            attached='top'
+            tabular
             inverted
             style={{
-              margin: 0,
-              height: window.innerHeight,
-              overflow: 'scroll'
+              // backgroundColor: 'indigo',
+              backgroundImage: `linear-gradient(to bottom right, teal,${schemeColor})`
             }}
-            attached='bottom'
           >
-            <Divider fitted hidden />
+            <Menu.Item header>
+              {/* <img src='https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Fadventuresofelguapo.files.wordpress.com%2F2014%2F06%2Ftroll-face.png&f=1' /> */}
+            </Menu.Item>
+            {/* REMOVED FROM COMPONENT DIRECTLY BELOW: active={activeItem === 'JSON'} */}
+
+            <Menu.Item name='JSON' onClick={this.handleSidebarClick}>
+              Display JSON Data
+            </Menu.Item>
+          </Menu>
+        </div>
+        <Sidebar.Pushable style={{ margin: 0 }} as={Segment} attached='bottom'>
+          <Sidebar
+            direction='left'
+            animation='push'
+            icon='labeled'
+            visible={visible}
+            inverted='true'
+            vertical='true'
+            width='wide'
+          >
             <ReactJson
-              style={{ height: window.innerHeight }}
               enableClipboard={false}
-              indentWidth='2'
+              indentWidth={2}
               displayDataTypes={false}
               theme='threezerotwofour'
-              src={{ storageData }}
+              src={storageData}
             />
-          </Segment>
-        </Grid.Column>
-        <Grid.Column
-          style={{ padding: 0, height: window.innerHeight, overflow: 'scroll' }}
-          width={9}
+          </Sidebar>
+
+          <Sidebar.Pusher>
+            <Grid
+              style={{
+                height: '100%',
+                marginTop: '0%'
+              }}
+            >
+              <Grid.Row
+                style={{
+                  height: viewHeight,
+                  padding: '0',
+                  margin: '0'
+                }}
+                column={1}
+              >
+                <Grid.Column
+                  style={{
+                    margin: '0',
+                    height: '100%',
+                    overflow: 'scroll'
+                  }}
+                >
+                  <VisualizationContainer treeData={storageData} />
+                </Grid.Column>
+              </Grid.Row>
+            </Grid>
+          </Sidebar.Pusher>
+        </Sidebar.Pushable>
+        <div
+          style={{ textAlign: 'center' }}
+          ref={rewindElement => (this.rewindElement = rewindElement)}
         >
-          <Divider />
-          <Segment basic>
-            <Switch>
-              <Route path='/cache' component={cacheVisualizationContainer} />
-              <Route path='/state' component={stateVisualizationContainer} />
-            </Switch>
+          <Segment
+            style={{
+              backgroundImage: `linear-gradient(to bottom right, teal, ${schemeColor})`
+            }}
+            basic
+            inverted
+          >
+            <Button.Group size='large' inverted color='black' icon>
+              <Button onClick={this.handleRewindButton}>
+                <Icon name='shuffle' />
+                REWIND
+              </Button>
+              <Button style={{ margin: 0 }} as='div' labelPosition='right'>
+                {/* <Button color="teal">
+                  <Icon name="heart" />
+                  STEPS
+                </Button> */}
+                <Label style={{ margin: 0 }} as='a' basic inverted='true'>
+                  STEPS: {duration}
+                </Label>
+              </Button>
+              <Button onClick={this.handleForwardButton}>
+                FAST-FORWARD
+                <Icon name='pause' />
+              </Button>
+            </Button.Group>
+            <Form inverted size='large'>
+              <Form.Input
+                // label={`Rewind: ${duration} steps `}
+                min={0}
+                max={15}
+                name='duration'
+                onChange={this.handleRewindSlider}
+                step={1}
+                type='range'
+                value={duration}
+              />
+            </Form>
           </Segment>
-          {/* <button onClick={this.handleBackClick}>Back</button>
-          <button onClick={this.handleForwardClick}>Forward</button> */}
-        </Grid.Column>
-      </Grid>
+        </div>
+      </div>
     );
   }
 }
