@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import * as d3 from 'd3';
+import { parse } from 'querystring';
 
 const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
   // Set the dimensions and margins of the diagram
@@ -12,7 +13,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
 
   var margin = { top: 20, right: 90, bottom: 30, left: 90 },
     width = 1200 - margin.left - margin.right,
-    height = 1000 - margin.top - margin.bottom;
+    height = 440 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   // appends a 'group' element to 'svg'
@@ -52,7 +53,6 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       d._children = d.children;
       d._children.forEach(collapse);
       d.children = null;
-      console.log(d);
     }
   }
 
@@ -70,11 +70,12 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
     nodes.forEach(d => {
       d.y = d.depth * 180;
       maxY = d.y > maxY ? d.y : maxY;
+      maxY = maxY > 600 ? maxY : 600;
       maxX = d.x > maxY ? d.x : maxX;
     });
 
     document.querySelector('svg').style.width =
-      (maxY + margin.right + margin.left).toString() + 'px';
+      (maxY + margin.right + margin.left + 200).toString() + 'px';
 
     // ****************** Nodes section ***************************
 
@@ -280,6 +281,80 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             font-weight: bold;
             opacity: 1`,
           );
+          let parentNode = circle.parentElement;
+          let coordinates = parentNode.attributes.transform.value
+            .replace(/(translate)|\(|\)/g, '')
+            .split(',');
+          console.log(coordinates);
+          coordinates[0] = (parseInt(coordinates[0]) + 110).toString();
+          coordinates[1] = (parseInt(coordinates[1]) - 30).toString();
+          if (circle.__data__.data.value) {
+            const dataProps = circle.__data__;
+            dataProps.data.value =
+              typeof dataProps.data.value === 'string'
+                ? dataProps.data.value
+                : dataProps.data.value.toString();
+            const spanElement1 = document.createElement('span');
+            const spanElement2 = document.createElement('span');
+            const spanElement3 = document.createElement('span');
+            const spanElement4 = document.createElement('span');
+            const breakElement = document.createElement('br');
+            let spanStyle =
+              'color:#E534AB;font-size: 12px;font-weight: bold; padding-left: 10px; opacity: 1';
+            let valueStyle =
+              'color: #ffffff;font-size: 12px;font-weight: bold; padding-left: 10px; opacity: 1';
+            let ns = 'http://www.w3.org/2000/svg';
+            let foreignObject = document.createElementNS(ns, 'foreignObject');
+            let divElement = document.createElement('div');
+            let popupWidth =
+              dataProps.data.name.length > dataProps.data.value.length
+                ? dataProps.data.name.length
+                : dataProps.data.value.length;
+            popupWidth += 6;
+            popupWidth *= 10;
+            console.log(
+              popupWidth,
+              dataProps.data.name.length,
+              dataProps.data.value.length,
+            );
+            foreignObject.setAttribute('width', popupWidth);
+            foreignObject.setAttribute('height', 50);
+            foreignObject.setAttribute('z-index', '998');
+            foreignObject.setAttribute('x', coordinates[0]);
+            foreignObject.setAttribute('y', coordinates[1]);
+            // foreignObject.setAttribute('x', (d.y + 130).toString());
+            // foreignObject.setAttribute('y', (d.x - 20).toString());
+            document.querySelector('svg').appendChild(foreignObject);
+            spanElement1.innerText = 'key: ';
+            spanElement1.setAttribute('style', spanStyle);
+            divElement.appendChild(spanElement1);
+            spanElement2.innerHTML = dataProps.data.name;
+            spanElement2.setAttribute('style', valueStyle);
+            divElement.appendChild(spanElement2);
+            divElement.appendChild(breakElement);
+            spanElement3.innerText = 'value: ';
+            spanElement3.setAttribute('style', spanStyle);
+            divElement.appendChild(spanElement3);
+            spanElement4.innerHTML = dataProps.data.value;
+            spanElement4.setAttribute('style', valueStyle);
+            divElement.appendChild(spanElement4);
+            divElement.setAttribute(
+              'style',
+              `z-index: 999;
+            height: 100%;
+            width: 100%;
+            background-color: black;
+            opacity: 0.8;
+            position: absolute;
+            left: ${d.y};
+            top: ${d.x};
+            text-align: left;
+            border-radius: 5px;
+            `,
+            );
+            document.querySelector('foreignObject').appendChild(divElement);
+            console.log(dataProps.data);
+          }
         }
       }
     }
@@ -305,6 +380,10 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             opacity: ${circle.__data__.oldOpacity};
             font-weight: ${circle.__data__.oldWeight};`,
           );
+          let foreignObject = document.querySelector('foreignObject');
+          let divElement = foreignObject.firstChild;
+          divElement.remove();
+          foreignObject.remove();
         }
       }
     }
@@ -313,7 +392,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
 
 const Tree = props => {
   useEffect(() => {
-    buildTree(props.treeData, false, props.isSearching);
+    buildTree(props.treeData, true, props.isSearching);
   });
 
   return <div id="svg" style={{ overflow: 'auto' }} />;

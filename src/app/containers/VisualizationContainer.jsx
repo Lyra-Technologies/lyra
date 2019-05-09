@@ -98,14 +98,13 @@ const VisualizationContainer = props => {
     let result = new Data(name);
     result.children = new Array(0);
     for (let el of Object.entries(input)) {
-      let newChild = new Data(el[0]);
       if (typeof el[1] === 'object') {
-        newChild.children = new Array(0);
-        newChild.children.push(parse(el[0], el[1]));
+        result.children.push(parse(el[0], el[1]));
       } else {
+        let newChild = new Data(el[0]);
         newChild.value = el[1];
+        result.children.push(newChild);
       }
-      result.children.push(newChild);
     }
     return result;
   }
