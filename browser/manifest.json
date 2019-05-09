@@ -2,10 +2,10 @@
   "manifest_version": 2,
   "name": "Lyra",
   "version": "0.0.1",
-  "description": "State Visualizer for Apollo",
+  "description": "Visualizer for Apollo Client",
   "minimum_chrome_version": "10.0",
   "devtools_page": "devtools.html",
-  "permissions": ["tabs", "activeTab", "<all_urls>", "storage"],
+  "permissions": ["tabs", "<all_urls>", "storage", "webNavigation"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
@@ -15,7 +15,19 @@
   ],
   "background": {
     "scripts": ["scripts/background.js"],
-    "persistent": false
+    "persistent": true
   },
-  "web_accessible_resources": ["scripts/inject.js"]
+  "icons": {
+    "16": "icons/lyra_logo16.png",
+    "48": "icons/lyra_logo48.png",
+    "128": "icons/lyra_logo128.png"
+  },
+  "page_action": {
+    "default_icon": "icons/lyra_logo16.png"
+  },
+  "web_accessible_resources": [
+    "scripts/inject.js",
+    "../src/assets/lyra_chrome_logo_med.png",
+    "../browser/icons/lyra_logo48.png"
+  ]
 }

@@ -1,20 +1,32 @@
-let started = false;
+/* using __APOLLO_DEVTOOLS_GLOBAL_HOOK__ global window object */
 
-const init = () => {
-  if (window.__APOLLO_CLIENT__) {
-    started = true;
-    return;
+function init() {
+  let client;
+  let devtoolHook;
+
+  if (window.__APOLLO_DEVTOOLS_GLOBAL_HOOK__) {
+    devtoolHook = window.__APOLLO_DEVTOOLS_GLOBAL_HOOK__;
+    client = devtoolHook.ApolloClient;
+    if (client) {
+      const data = {
+        queries: client.queryManager
+          ? client.queryManager.queryStore.getStore()
+          : {},
+        mutations: client.queryManager
+          ? client.queryManager.mutationStore.getStore()
+          : {},
+        inspector: client.cache.extract(true)
+      };
+      // send data to content script
+      window.postMessage({
+        type: 'inject',
+        message: data
+      });
+      return;
+    }
+  } else {
+    console.log('Install and/or enable Apollo devtools to run Lyra.');
   }
-  console.log('Apollo Client needed to run this app.');
-  setTimeout(init, 500);
-};
+}
 
 init();
-
-if (!started) setTimeout(init, 500);
-else {
-  window.postMessage({
-    type: 'inject',
-    message: JSON.stringify(window.__APOLLO_CLIENT__.cache.data.data)
-  });
-}
