@@ -12,7 +12,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
 
   const margin = { top: 20, right: 90, bottom: 30, left: 90 },
     width = 1200 - margin.left - margin.right,
-    height = 1000 - margin.top - margin.bottom;
+    height = 4000 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   // appends a 'group' element to 'svg'

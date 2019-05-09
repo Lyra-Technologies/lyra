@@ -7,14 +7,13 @@ class App extends Component {
     this.state = {
       initialized: false,
       index: 0,
-      shouldUpdate: false
+      shouldUpdate: false,
+      data: []
     };
 
     this.portToScripts = null;
 
     const onPanelShown = () => {
-      // chrome.runtime.sendMessage('lyra-panel-shown');
-      // this.setState({ panelShown: true });
       const { tabId } = chrome.devtools.inspectedWindow;
 
       if (this.state.initialized) {
@@ -27,14 +26,8 @@ class App extends Component {
       this.setState({ initialized: true });
     };
 
-    // const onPanelHidden = () => {
-    //   chrome.runtime.sendMessage('lyra-panel-hidden');
-    //   this.setState({ panelShown: false });
-    // };
-
     chrome.devtools.panels.create('Lyra', null, 'devtools.html', panel => {
       panel.onShown.addListener(onPanelShown);
-      // panel.onHidden.addListener(onPanelHidden);
     });
   }
 
@@ -55,16 +48,27 @@ class App extends Component {
                 'Error setting Chrome storage',
                 chrome.runtime.lastError
               );
-            this.setState({ index: this.state.index + 1, shouldUpdate: true });
+            this.setState(
+              {
+                index: this.state.index + 1
+                // shouldUpdate: true
+              },
+              () =>
+                console.log(
+                  'chrome storage set, index incremented',
+                  this.state.index
+                )
+            );
           }
         );
-      } else if (message.type === 'tabUpdate') {
-        // listen for a message from background script triggering a refresh
-        // of the app once the user refreshes
-        const { tabId } = message;
-        const panelId = chrome.devtools.inspectedWindow.tabId;
-        if (tabId === panelId) this.resetApp();
       }
+      // else if (message.type === 'tabUpdate') {
+      //   // listen for a message from background script triggering a refresh
+      //   // of the app once the user refreshes
+      //   const { tabId } = message;
+      //   const panelId = chrome.devtools.inspectedWindow.tabId;
+      //   // if (tabId === panelId) this.resetApp();
+      // }
     });
     // flush Chrome storage once the port disconnects
     portToScripts.onDisconnect.addListener(() => {
@@ -80,12 +84,8 @@ class App extends Component {
   }
 
   render() {
-    return (
-      <MainContainer
-        index={this.state.index}
-        shouldUpdate={this.state.shouldUpdate}
-      />
-    );
+    return <MainContainer index={this.state.index} />;
+    // shouldUpdate={this.state.shouldUpdate}
   }
 }
 

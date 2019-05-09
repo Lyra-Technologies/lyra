@@ -146,7 +146,7 @@ const VisualizationContainer = props => {
     return tree;
   };
 
-  console.log('tree data in visualization container', props.treeData);
+  // console.log('tree data in visualization container', props.treeData);
   return (
     <div style={{ padding: '10px' }}>
       <SearchBoxWithDropdown

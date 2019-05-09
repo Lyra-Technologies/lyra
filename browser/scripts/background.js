@@ -68,12 +68,3 @@ chrome.webNavigation.onCommitted.addListener(event => {
     connections[tabId].postMessage({ type: 'tabUpdate', tabId: tabId });
   }
 });
-
-// manifest json
-// "icons": {
-//   "128": "lyra_chrome_logo128.png"
-// },
-
-// "page_action": {
-//   "default_icon": "lyra_chrome_logo128.png"
-// },

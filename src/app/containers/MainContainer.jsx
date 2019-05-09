@@ -18,11 +18,12 @@ class MainContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentIndex: 0,
+      userDefinedIndex: 0,
       rewindElHeight: 0,
       menuHeight: 0,
       visible: false,
-      storageData: {}
+      storageData: {},
+      currentIndex: this.props.index
     };
 
     this.handleSidebarClick = this.handleSidebarClick.bind(this);
@@ -38,47 +39,51 @@ class MainContainer extends Component {
   }
 
   handleRewindSlider(e, { value }) {
-    this.setState({ currentIndex: value });
+    this.setState({ userDefinedIndex: value });
   }
 
-  // handleRewindButton() {
-  //   this.setState({ currentIndex: this.state.currentIndex - 1 });
-  // }
-
-  // handleForwardButton() {
-  //   this.setState({ currentIndex: this.state.currentIndex + 1 });
-  // }
-
   handleForwardButton() {
-    this.setState((prevState, props) => {
-      if (prevState.currentIndex < props.index) {
-        console.log(
-          'in handleForwardButton, about to increment currentIndex',
-          prevState.currentIndex
+    const { currentIndex, userDefinedIndex } = this.state;
+    console.log(
+      'in handleforwardbutton, current index',
+      currentIndex,
+      'userdefined',
+      userDefinedIndex
+    );
+
+    if (userDefinedIndex < currentIndex) {
+      chrome.storage.local.get([`${userDefinedIndex + 1}`], res => {
+        console.log('response from chrome storage', res);
+        this.setState(
+          {
+            userDefinedIndex: userDefinedIndex + 1,
+            storageData: res[`${userDefinedIndex + 1}`]
+          },
+          () => console.log('this.state in handleForwardButton', this.state)
         );
-        return { currentIndex: prevState.currentIndex + 1 };
-      } else {
-        // #TODO make the button inactive
-        // index is now out of range
-        console.log('in handleForwardButton, index out of range');
-        return { currentIndex: props.index };
-      }
-    });
+      });
+
+      // else {
+      //   // #TODO make the button inactive
+      //   // index is now out of range
+      //   console.log(
+      //     'in handleForwardButton, index out of range',
+      //     userDefinedIndex
+      //   );
+      //   return { userDefinedIndex: currentIndex };
+      // }
+    }
   }
 
   handleRewindButton() {
     this.setState((prevState, props) => {
-      if (prevState.currentIndex > 1) {
-        console.log(
-          'in handleRewindButton, about to decrement currentIndex',
-          prevState.currentIndex
-        );
-        return { currentIndex: prevState.currentIndex - 1 };
+      if (prevState.userDefinedIndex > 1) {
+        return { userDefinedIndex: prevState.userDefinedIndex - 1 };
       } else {
         // #TODO make the button inactive
         // the user shouldn't be able to go back once the index reaches 0
         console.log('in handleRewindButton, index out of range');
-        return { currentIndex: prevState.currentIndex };
+        return { userDefinedIndex: prevState.userDefinedIndex };
       }
     });
   }
@@ -91,7 +96,7 @@ class MainContainer extends Component {
     this.setState({ rewindElHeight });
 
     // fetch data from Chrome storage, set in the App component
-    chrome.storage.local.get([`${this.props.index}`], res => {
+    chrome.storage.local.get(['0'], res => {
       if (chrome.runtime.lastError) {
         console.error(
           'Error fetching data from Chrome storage:',
@@ -100,12 +105,12 @@ class MainContainer extends Component {
       }
       this.setState(
         {
-          storageData: res[`${this.props.index}`]
+          storageData: res['0']
         },
         () =>
           console.log(
             'data fetched from store',
-            res[`${this.props.index}`],
+            res['0'],
             'this.props.index',
             this.props.index,
             'this.state',
@@ -115,26 +120,38 @@ class MainContainer extends Component {
     });
   }
 
-  componentDidUpdate(prevProps) {
-    console.log('in cDU, prevProps', prevProps);
-    if (prevProps.index !== this.props.index) {
+  componentDidUpdate(prevProps, prevState) {
+    console.log('component did update fired in main container');
+    if (prevState.currentIndex !== this.props.index) {
       chrome.storage.local.get([`${this.props.index}`], res => {
-        this.setState({
-          storageData: res[`${this.props.index}`]
-          // currentIndex: this.props.index
-        });
+        this.setState(
+          {
+            storageData: res[`${this.props.index}`],
+            currentIndex: this.props.index
+          },
+          () => 'cDU fetched data ',
+          res[`${this.props.index}`]
+        );
       });
     }
+    // if (prevState.currentIndex !== this.state.currentIndex) {
+    //   //
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      this.props.shouldUpdate !== nextProps.shouldUpdate ||
-      this.props.index !== nextProps.currentIndex
-    );
-  }
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   return (
+  //     this.props.shouldUpdate !== nextProps.shouldUpdate
+  //     // this.props.index !== nextProps.currentIndex
+  //   );
+  // }
 
   render() {
+    console.log(
+      'this.state in main container',
+      this.state,
+      'this.props',
+      this.props
+    );
     const schemeColor = '#00CCCC';
 
     const {
@@ -142,7 +159,8 @@ class MainContainer extends Component {
       storageData,
       visible,
       menuHeight,
-      rewindElHeight
+      rewindElHeight,
+      userDefinedIndex
     } = this.state;
 
     let viewHeight = window.innerHeight - menuHeight - rewindElHeight;
@@ -154,16 +172,11 @@ class MainContainer extends Component {
             tabular
             inverted
             style={{
-              // backgroundColor: 'indigo',
               backgroundImage: `linear-gradient(to bottom right, teal,${schemeColor})`
             }}
           >
             <Menu.Item header>
-              <img
-                src='../../assets/lyra_chrome_logo_med.png'
-                alt='Lyra logo'
-                height='20'
-              />
+              {/* <img alt='Lyra logo' height='20' /> */}
             </Menu.Item>
 
             <Menu.Item name='JSON' onClick={this.handleSidebarClick}>
@@ -213,6 +226,7 @@ class MainContainer extends Component {
                     overflow: 'scroll'
                   }}
                 >
+                  {/* <VisualizationContainer treeData={storageData} /> */}
                   <VisualizationContainer treeData={storageData} />
                 </Grid.Column>
               </Grid.Row>
@@ -236,12 +250,8 @@ class MainContainer extends Component {
                 rewind
               </Button>
               <Button style={{ margin: 0 }} as='div' labelPosition='right'>
-                {/* <Button color="teal">
-                  <Icon name="heart" />
-                  STEPS
-                </Button> */}
                 <Label style={{ margin: 0 }} as='a' basic inverted='true'>
-                  steps: {this.props.index}
+                  steps: {userDefinedIndex}
                 </Label>
               </Button>
               <Button onClick={this.handleForwardButton}>
@@ -251,14 +261,13 @@ class MainContainer extends Component {
             </Button.Group>
             <Form inverted size='large'>
               <Form.Input
-                // label={`Rewind: ${currentIndex} steps `}
                 min={0}
-                max={this.props.index}
-                name='currentIndex'
+                max={currentIndex}
+                name='userDefinedIndex'
                 onChange={this.handleRewindSlider}
                 step={1}
                 type='range'
-                value={currentIndex}
+                value={userDefinedIndex}
               />
             </Form>
           </Segment>
