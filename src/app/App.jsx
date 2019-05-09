@@ -6,7 +6,8 @@ class App extends Component {
     super(props);
     this.state = {
       initialized: false,
-      index: 0
+      index: 0,
+      shouldUpdate: false
     };
 
     this.portToScripts = null;
@@ -42,15 +43,9 @@ class App extends Component {
     this.portToScripts = portToScripts;
 
     portToScripts.onMessage.addListener(message => {
-      console.log('app component receiving data', message.message);
+      console.log('app receiving messages', message.message);
       // filter incoming messages
       if (message.type === 'toRender' && message.message) {
-        // const parsed = parse(message.message.inspector);
-        // console.log('parsed inspector data', parsed);
-        console.log(
-          'app component receiving data from injected script',
-          message.message
-        );
         chrome.storage.local.set(
           { [`${this.state.index}`]: message.message.inspector },
           () => {
@@ -60,14 +55,15 @@ class App extends Component {
                 'Error setting Chrome storage',
                 chrome.runtime.lastError
               );
-            this.setState({ index: this.state.index + 1 }, () =>
-              console.log(
-                'Chrome storage set, index has been incremented',
-                this.state.index
-              )
-            );
+            this.setState({ index: this.state.index + 1, shouldUpdate: true });
           }
         );
+      } else if (message.type === 'tabUpdate') {
+        // listen for a message from background script triggering a refresh
+        // of the app once the user refreshes
+        const { tabId } = message;
+        const panelId = chrome.devtools.inspectedWindow.tabId;
+        if (tabId === panelId) this.resetApp();
       }
     });
     // flush Chrome storage once the port disconnects
@@ -78,8 +74,18 @@ class App extends Component {
     });
   }
 
+  resetApp() {
+    console.log('reset app in app component is firing');
+    this.setState({ shouldUpdate: true });
+  }
+
   render() {
-    return <MainContainer index={this.state.index} />;
+    return (
+      <MainContainer
+        index={this.state.index}
+        shouldUpdate={this.state.shouldUpdate}
+      />
+    );
   }
 }
 

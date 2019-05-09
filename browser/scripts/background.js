@@ -49,10 +49,31 @@ chrome.tabs.onRemoved.addListener(tabId => {
   chrome.storage.local.clear();
 });
 
-// add an event listener for tab changes
-chrome.tabs.onUpdated.addListener((tabId, info) => {
+// chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
+//   if (!connections[tabId]) return;
+//   else if (info.status === 'complete') {
+//     console.log('tab refreshed, tabID, ', tabId, 'info', info, 'TAB', tab);
+//     connections[tabId].postMessage({ type: 'tabUpdate', tabId: tabId });
+//     // const message = { type: 'tabUpdate' };
+//     // chrome.tabs.sendMessage(tabId, message);
+//   }
+// });
+
+// add an event listener for tab refreshes
+chrome.webNavigation.onCommitted.addListener(event => {
+  const { tabId, transitionType } = event;
+  // only listen to events fired on watched tabs
   if (!connections[tabId]) return;
-  else if (info.status === 'complete') {
-    connections[tabId].postMessage({ type: 'tabUpdate' });
+  if (transitionType === 'reload') {
+    connections[tabId].postMessage({ type: 'tabUpdate', tabId: tabId });
   }
 });
+
+// manifest json
+// "icons": {
+//   "128": "lyra_chrome_logo128.png"
+// },
+
+// "page_action": {
+//   "default_icon": "lyra_chrome_logo128.png"
+// },

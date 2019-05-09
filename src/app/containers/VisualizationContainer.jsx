@@ -63,7 +63,7 @@ const VisualizationContainer = props => {
     // return handleClearSearch;
   }, [searchKeyValue.length, newTree, isSearching]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setFullTree(parse('root', props.treeData));
   }, [props.treeData]);
 
@@ -146,7 +146,7 @@ const VisualizationContainer = props => {
     return tree;
   };
 
-  console.log('data in visualization container', props.treeData);
+  console.log('tree data in visualization container', props.treeData);
   return (
     <div style={{ padding: '10px' }}>
       <SearchBoxWithDropdown

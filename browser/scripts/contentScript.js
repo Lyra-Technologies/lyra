@@ -42,9 +42,9 @@ chrome.runtime.onMessage.addListener((message, sender, res) => {
     injectScript(chrome.extension.getURL('scripts/inject.js'));
   }
   // listen for tab changes and reinject script if needed
-  if (message.message === 'tabUpdate' && !injected) {
-    injectScript(chrome.extension.getURL('scripts/inject.js'));
-  }
+  // if (message.message === 'tabUpdate' && !injected) {
+  //   injectScript(chrome.extension.getURL('scripts/inject.js'));
+  // }
 });
 
 // listen for data sent from injected script
@@ -62,9 +62,12 @@ window.addEventListener('message', message => {
         message: apolloCache
       });
     }
-  } else {
-    return;
+  } else if (message.data.type === 'tabUpdate') {
+    chrome.runtime.sendMessage(message.data);
   }
+  // else {
+  //   return;
+  // }
 });
 
 // install a MutationObserver instance on the window object
@@ -81,7 +84,6 @@ function subscriber(mutations) {
   let shouldUpdate = true;
 
   if (firstInject) {
-    console.log('first injection of script');
     injectScript(chrome.extension.getURL('scripts/inject.js'));
     firstInject = false;
   }
@@ -109,9 +111,6 @@ function subscriber(mutations) {
     });
   }
   if (shouldUpdate) {
-    console.log(
-      'mutation observer has detected a mutation, script will be injected'
-    );
     // throttle(injectScript(chrome.extension.getURL('scripts/inject.js')), 1000);
     injectScript(chrome.extension.getURL('scripts/inject.js'));
     shouldUpdate = false;
