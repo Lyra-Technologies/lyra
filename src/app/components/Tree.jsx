@@ -11,14 +11,14 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
     });
   }
 
-  var margin = { top: 20, right: 90, bottom: 30, left: 90 },
+  const margin = { top: 20, right: 90, bottom: 30, left: 90 },
     width = 1200 - margin.left - margin.right,
-    height = 440 - margin.top - margin.bottom;
+    height = 4000 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   // appends a 'group' element to 'svg'
   // moves the 'group' element to the top left margin
-  var svg = d3
+  const svg = d3
     .select('#svg')
     .append('svg')
     .attr('width', width + margin.right + margin.left)
@@ -26,12 +26,12 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
     .append('g')
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  var i = 0,
+  let i = 0,
     duration = 750,
     root;
 
   // declares a tree layout and assigns the size
-  var treemap = d3.tree().size([height, width]);
+  const treemap = d3.tree().size([height, width]);
 
   // Assigns parent, children, height, depth
   root = d3.hierarchy(treeData, function(d) {
@@ -58,12 +58,12 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
 
   function update(source) {
     // Assigns the x and y position for the nodes
-    var treeData = treemap(root);
+    const treeData = treemap(root);
     let maxY = 0;
     let maxX = 0;
 
     // Compute the new tree layout.
-    var nodes = treeData.descendants(),
+    const nodes = treeData.descendants(),
       links = treeData.descendants().slice(1);
 
     // Normalize for fixed-depth and get maxWidth and maxHeight.
@@ -80,12 +80,12 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
     // ****************** Nodes section ***************************
 
     // Update the nodes...
-    var node = svg.selectAll('g.node').data(nodes, d => {
+    const node = svg.selectAll('g.node').data(nodes, d => {
       return d.id || (d.id = ++i);
     });
 
     // Enter any new modes at the parent's previous position.
-    var nodeEnter = node
+    const nodeEnter = node
       .enter()
       .append('g')
       .attr('class', 'node')
@@ -120,7 +120,16 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
         return d.children || d._children ? 'end' : 'end';
       })
       .text(d => {
-        return d.data.name;
+        let length = d.data.name.length;
+        if (length < 15) return d.data.name;
+        else {
+          return (
+            d.data.name
+              .split('')
+              .slice(0, 13)
+              .join('') + '...'
+          );
+        }
       })
       .attr('style', d => {
         if (!isSearching) return `opacity: 1; font-weight: normal`;
@@ -129,8 +138,15 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       })
       .attr('cursor', 'pointer');
 
+    nodeEnter
+      .append('foreignObject')
+      .attr('class', 'modeless-popup-show')
+      .attr('dy', '.35em')
+      .attr('x', 13)
+      .attr('y', 13);
+
     // UPDATE
-    var nodeUpdate = nodeEnter.merge(node);
+    const nodeUpdate = nodeEnter.merge(node);
 
     // Transition to the proper position for the node
     nodeUpdate
@@ -155,7 +171,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       });
 
     // Remove any exiting nodes
-    var nodeExit = node
+    const nodeExit = node
       .exit()
       .transition()
       .duration(duration)
@@ -173,17 +189,17 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
     // ****************** links section ***************************
 
     // Update the links...
-    var link = svg.selectAll('path.link').data(links, d => {
+    const link = svg.selectAll('path.link').data(links, d => {
       return d.id;
     });
 
     // Enter any new links at the parent's previous position.
-    var linkEnter = link
+    const linkEnter = link
       .enter()
       .insert('path', 'g')
       .attr('class', 'link')
       .attr('d', d => {
-        var o = { x: source.x0, y: source.y0 };
+        const o = { x: source.x0, y: source.y0 };
         return diagonal(o, o);
       })
       .style('opacity', 0.2)
@@ -192,7 +208,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       .style('stroke-width', '4px');
 
     // UPDATE
-    var linkUpdate = linkEnter.merge(link);
+    const linkUpdate = linkEnter.merge(link);
 
     // Transition back to the parent element position
     linkUpdate
@@ -206,12 +222,12 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       .style('stroke', 'E534AB');
 
     // Remove any exiting links
-    var linkExit = link
+    const linkExit = link
       .exit()
       .transition()
       .duration(duration)
       .attr('d', d => {
-        var o = { x: source.x, y: source.y };
+        const o = { x: source.x, y: source.y };
         return diagonal(o, o);
       })
       .style('opacity', 0.2)
@@ -304,7 +320,6 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             let valueStyle =
               'color: #ffffff;font-size: 12px;font-weight: bold; padding-left: 10px; opacity: 1';
             let ns = 'http://www.w3.org/2000/svg';
-            let foreignObject = document.createElementNS(ns, 'foreignObject');
             let divElement = document.createElement('div');
             let popupWidth =
               dataProps.data.name.length > dataProps.data.value.length
@@ -320,8 +335,8 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             foreignObject.setAttribute('width', popupWidth);
             foreignObject.setAttribute('height', 50);
             foreignObject.setAttribute('z-index', '998');
-            foreignObject.setAttribute('x', coordinates[0]);
-            foreignObject.setAttribute('y', coordinates[1]);
+            // foreignObject.setAttribute('x', coordinates[0]);
+            // foreignObject.setAttribute('y', coordinates[1]);
             // foreignObject.setAttribute('x', (d.y + 130).toString());
             // foreignObject.setAttribute('y', (d.x - 20).toString());
             document.querySelector('svg').appendChild(foreignObject);
@@ -392,7 +407,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
 
 const Tree = props => {
   useEffect(() => {
-    buildTree(props.treeData, true, props.isSearching);
+    buildTree(props.treeData, false, props.isSearching);
   });
 
   return <div id="svg" style={{ overflow: 'auto' }} />;
