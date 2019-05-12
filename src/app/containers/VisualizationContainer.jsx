@@ -119,7 +119,6 @@ const VisualizationContainer = props => {
   };
 
   const markFound = (tree, inputKeys, inputValues) => {
-    console.log(inputKeys, inputValues);
     if (inputKeys) {
       tree.markedInSearch = RegExp(`(${inputKeys})`, 'g').test(tree.name)
         ? true
@@ -130,14 +129,6 @@ const VisualizationContainer = props => {
         ? true
         : false;
     }
-    console.log(
-      inputKeys,
-      tree.name,
-      RegExp(`(${inputValues})`, 'g').test(tree.value),
-      inputValues,
-      tree.value,
-      RegExp(`(${inputKeys})`, 'g').test(tree.name),
-    );
     if (tree.children) {
       for (let index in tree.children) {
         markFound(tree.children[index], inputKeys, inputValues);

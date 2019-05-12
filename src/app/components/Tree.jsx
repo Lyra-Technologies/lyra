@@ -13,7 +13,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
 
   const margin = { top: 20, right: 90, bottom: 30, left: 90 },
     width = 1200 - margin.left - margin.right,
-    height = 4000 - margin.top - margin.bottom;
+    height = 4830 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   // appends a 'group' element to 'svg'
@@ -62,6 +62,17 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
     let maxY = 0;
     let maxX = 0;
 
+    // resize svg and tree
+    // console.log(width);
+    // let newHeight = treeData.descendants() * 15;
+    // treemap.size([newHeight, width]);
+    // let svgElement = document.querySelector('svg');
+    // console.log(svgElement);
+    // svgElement.setAttribute(
+    //   'style',
+    //   `${newHeight + margin.top + margin.bottom}`,
+    // );
+
     // Compute the new tree layout.
     const nodes = treeData.descendants(),
       links = treeData.descendants().slice(1);
@@ -74,7 +85,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       maxX = d.x > maxY ? d.x : maxX;
     });
 
-    document.querySelector('svg').style.width =
+    document.querySelector('svg').setAttribute.width =
       (maxY + margin.right + margin.left + 200).toString() + 'px';
 
     // ****************** Nodes section ***************************
@@ -138,12 +149,91 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       })
       .attr('cursor', 'pointer');
 
+    //add modeless popup with information information
+
     nodeEnter
-      .append('foreignObject')
-      .attr('class', 'modeless-popup-show')
+      .append('rect')
+      .attr('class', 'modeless-popup')
+      .attr('width', d => {
+        if (d.data.value) {
+          let popupWidth =
+            d.data.name.length > d.data.value.toString().length
+              ? d.data.name.length
+              : d.data.value.length;
+          popupWidth += 9;
+          popupWidth *= 8;
+          console.log('width', popupWidth);
+          return popupWidth;
+        } else return 1e-6;
+      })
+      .attr('height', '50')
+      .attr('rx', '10')
+      .attr('fill', '333333')
+      .style('fill-opacity', '0.3')
+      .attr('x', '15')
+      .style('visibility', 'hidden');
+
+    // add text to popup
+
+    nodeEnter
+      .append('text')
+      .attr('class', 'modeless-popup-key')
       .attr('dy', '.35em')
-      .attr('x', 13)
-      .attr('y', 13);
+      .attr('x', '25')
+      .attr('y', '15')
+      .attr('text-anchor', 'start')
+      .attr('color', '#E534AB')
+      .attr('fill', '#E534AB')
+      .attr('font-weight', 'normal')
+      .attr('font-size', '14')
+      .text('key: ')
+      .style('visibility', 'hidden');
+
+    nodeEnter
+      .append('text')
+      .attr('class', 'modeless-popup-text')
+      .attr('dy', '.35em')
+      .attr('x', '55')
+      .attr('y', '15')
+      .attr('text-anchor', 'start')
+      .attr('color', '#ffffff')
+      .attr('fill', '#ffffff')
+      .attr('font-weight', 'normal')
+      .attr('font-size', '14')
+      .text(d => {
+        if (d.data.value) return d.data.name;
+      })
+      .style('visibility', 'hidden');
+
+    nodeEnter
+      .append('text')
+      .attr('class', 'modeless-popup-key')
+      .attr('dy', '.35em')
+      .attr('x', '25')
+      .attr('y', '35')
+      .attr('text-anchor', 'start')
+      .attr('color', '#E534AB')
+      .attr('fill', '#E534AB')
+      .attr('font-weight', 'normal')
+      .attr('font-size', '14')
+      .text('value: ')
+      .style('visibility', 'hidden');
+
+    nodeEnter
+      .append('text')
+      .attr('class', 'modeless-popup-text')
+      .attr('dy', '.35em')
+      .attr('x', '65')
+      .attr('y', '35')
+      .attr('text-anchor', 'start')
+      .attr('color', '#ffffff')
+      .attr('fill', '#ffffff')
+      .attr('font-weight', 'normal')
+      .attr('font-size', '14')
+      .text(d => {
+        if (d.data.value) return d.data.value;
+      })
+      .style('visibility', 'hidden');
 
     // UPDATE
     const nodeUpdate = nodeEnter.merge(node);
@@ -297,78 +387,19 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             font-weight: bold;
             opacity: 1`,
           );
-          let parentNode = circle.parentElement;
-          let coordinates = parentNode.attributes.transform.value
-            .replace(/(translate)|\(|\)/g, '')
-            .split(',');
-          console.log(coordinates);
-          coordinates[0] = (parseInt(coordinates[0]) + 110).toString();
-          coordinates[1] = (parseInt(coordinates[1]) - 30).toString();
-          if (circle.__data__.data.value) {
-            const dataProps = circle.__data__;
-            dataProps.data.value =
-              typeof dataProps.data.value === 'string'
-                ? dataProps.data.value
-                : dataProps.data.value.toString();
-            const spanElement1 = document.createElement('span');
-            const spanElement2 = document.createElement('span');
-            const spanElement3 = document.createElement('span');
-            const spanElement4 = document.createElement('span');
-            const breakElement = document.createElement('br');
-            let spanStyle =
-              'color:#E534AB;font-size: 12px;font-weight: bold; padding-left: 10px; opacity: 1';
-            let valueStyle =
-              'color: #ffffff;font-size: 12px;font-weight: bold; padding-left: 10px; opacity: 1';
-            let ns = 'http://www.w3.org/2000/svg';
-            let divElement = document.createElement('div');
-            let popupWidth =
-              dataProps.data.name.length > dataProps.data.value.length
-                ? dataProps.data.name.length
-                : dataProps.data.value.length;
-            popupWidth += 6;
-            popupWidth *= 10;
-            console.log(
-              popupWidth,
-              dataProps.data.name.length,
-              dataProps.data.value.length,
-            );
-            foreignObject.setAttribute('width', popupWidth);
-            foreignObject.setAttribute('height', 50);
-            foreignObject.setAttribute('z-index', '998');
-            // foreignObject.setAttribute('x', coordinates[0]);
-            // foreignObject.setAttribute('y', coordinates[1]);
-            // foreignObject.setAttribute('x', (d.y + 130).toString());
-            // foreignObject.setAttribute('y', (d.x - 20).toString());
-            document.querySelector('svg').appendChild(foreignObject);
-            spanElement1.innerText = 'key: ';
-            spanElement1.setAttribute('style', spanStyle);
-            divElement.appendChild(spanElement1);
-            spanElement2.innerHTML = dataProps.data.name;
-            spanElement2.setAttribute('style', valueStyle);
-            divElement.appendChild(spanElement2);
-            divElement.appendChild(breakElement);
-            spanElement3.innerText = 'value: ';
-            spanElement3.setAttribute('style', spanStyle);
-            divElement.appendChild(spanElement3);
-            spanElement4.innerHTML = dataProps.data.value;
-            spanElement4.setAttribute('style', valueStyle);
-            divElement.appendChild(spanElement4);
-            divElement.setAttribute(
-              'style',
-              `z-index: 999;
-            height: 100%;
-            width: 100%;
-            background-color: black;
-            opacity: 0.8;
-            position: absolute;
-            left: ${d.y};
-            top: ${d.x};
-            text-align: left;
-            border-radius: 5px;
-            `,
-            );
-            document.querySelector('foreignObject').appendChild(divElement);
-            console.log(dataProps.data);
+          let dataProps = circle.__data__.data;
+          if (dataProps.value) {
+            let parentElement = circle.parentNode;
+            for (let element of parentElement.childNodes) {
+              if (
+                element.className.baseVal === 'modeless-popup' ||
+                element.className.baseVal === 'modeless-popup-text' ||
+                element.className.baseVal === 'modeless-popup-key'
+              ) {
+                element.setAttribute('style', 'visibility: visible');
+              }
+              console.log(element);
+            }
           }
         }
       }
@@ -395,10 +426,20 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             opacity: ${circle.__data__.oldOpacity};
             font-weight: ${circle.__data__.oldWeight};`,
           );
-          let foreignObject = document.querySelector('foreignObject');
-          let divElement = foreignObject.firstChild;
-          divElement.remove();
-          foreignObject.remove();
+          let dataProps = circle.__data__.data;
+          if (dataProps.value) {
+            let parentElement = circle.parentNode;
+            for (let element of parentElement.childNodes) {
+              if (
+                element.className.baseVal === 'modeless-popup' ||
+                element.className.baseVal === 'modeless-popup-text' ||
+                element.className.baseVal === 'modeless-popup-key'
+              ) {
+                console.log(dataProps);
+                element.setAttribute('style', 'visibility: hidden');
+              }
+            }
+          }
         }
       }
     }
