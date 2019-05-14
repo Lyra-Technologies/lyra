@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import * as d3 from 'd3';
+import { parse } from 'querystring';
 
 const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
   // Set the dimensions and margins of the diagram
@@ -12,7 +13,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
 
   const margin = { top: 20, right: 90, bottom: 30, left: 90 },
     width = 1200 - margin.left - margin.right,
-    height = 4000 - margin.top - margin.bottom;
+    height = 4830 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   // appends a 'group' element to 'svg'
@@ -52,7 +53,6 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       d._children = d.children;
       d._children.forEach(collapse);
       d.children = null;
-      console.log(d);
     }
   }
 
@@ -62,6 +62,17 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
     let maxY = 0;
     let maxX = 0;
 
+    // resize svg and tree
+    // console.log(width);
+    // let newHeight = treeData.descendants() * 15;
+    // treemap.size([newHeight, width]);
+    // let svgElement = document.querySelector('svg');
+    // console.log(svgElement);
+    // svgElement.setAttribute(
+    //   'style',
+    //   `${newHeight + margin.top + margin.bottom}`,
+    // );
+
     // Compute the new tree layout.
     const nodes = treeData.descendants(),
       links = treeData.descendants().slice(1);
@@ -70,11 +81,12 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
     nodes.forEach(d => {
       d.y = d.depth * 180;
       maxY = d.y > maxY ? d.y : maxY;
+      maxY = maxY > 600 ? maxY : 600;
       maxX = d.x > maxY ? d.x : maxX;
     });
 
-    document.querySelector('svg').style.width =
-      (maxY + margin.right + margin.left).toString() + 'px';
+    document.querySelector('svg').setAttribute.width =
+      (maxY + margin.right + margin.left + 200).toString() + 'px';
 
     // ****************** Nodes section ***************************
 
@@ -119,7 +131,16 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
         return d.children || d._children ? 'end' : 'end';
       })
       .text(d => {
-        return d.data.name;
+        let length = d.data.name.length;
+        if (length < 15) return d.data.name;
+        else {
+          return (
+            d.data.name
+              .split('')
+              .slice(0, 13)
+              .join('') + '...'
+          );
+        }
       })
       .attr('style', d => {
         if (!isSearching) return `opacity: 1; font-weight: normal`;
@@ -127,6 +148,92 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
         return `opacity: 0.5; font-weight: normal`;
       })
       .attr('cursor', 'pointer');
+
+    //add modeless popup with information information
+
+    nodeEnter
+      .append('rect')
+      .attr('class', 'modeless-popup')
+      .attr('width', d => {
+        if (d.data.value) {
+          let popupWidth =
+            d.data.name.length > d.data.value.toString().length
+              ? d.data.name.length
+              : d.data.value.length;
+          popupWidth += 9;
+          popupWidth *= 8;
+          console.log('width', popupWidth);
+          return popupWidth;
+        } else return 1e-6;
+      })
+      .attr('height', '50')
+      .attr('rx', '10')
+      .attr('fill', '333333')
+      .style('fill-opacity', '0.3')
+      .attr('x', '15')
+      .style('visibility', 'hidden');
+
+    // add text to popup
+
+    nodeEnter
+      .append('text')
+      .attr('class', 'modeless-popup-key')
+      .attr('dy', '.35em')
+      .attr('x', '25')
+      .attr('y', '15')
+      .attr('text-anchor', 'start')
+      .attr('color', '#E534AB')
+      .attr('fill', '#E534AB')
+      .attr('font-weight', 'normal')
+      .attr('font-size', '14')
+      .text('key: ')
+      .style('visibility', 'hidden');
+
+    nodeEnter
+      .append('text')
+      .attr('class', 'modeless-popup-text')
+      .attr('dy', '.35em')
+      .attr('x', '55')
+      .attr('y', '15')
+      .attr('text-anchor', 'start')
+      .attr('color', '#ffffff')
+      .attr('fill', '#ffffff')
+      .attr('font-weight', 'normal')
+      .attr('font-size', '14')
+      .text(d => {
+        if (d.data.value) return d.data.name;
+      })
+      .style('visibility', 'hidden');
+
+    nodeEnter
+      .append('text')
+      .attr('class', 'modeless-popup-key')
+      .attr('dy', '.35em')
+      .attr('x', '25')
+      .attr('y', '35')
+      .attr('text-anchor', 'start')
+      .attr('color', '#E534AB')
+      .attr('fill', '#E534AB')
+      .attr('font-weight', 'normal')
+      .attr('font-size', '14')
+      .text('value: ')
+      .style('visibility', 'hidden');
+
+    nodeEnter
+      .append('text')
+      .attr('class', 'modeless-popup-text')
+      .attr('dy', '.35em')
+      .attr('x', '65')
+      .attr('y', '35')
+      .attr('text-anchor', 'start')
+      .attr('color', '#ffffff')
+      .attr('fill', '#ffffff')
+      .attr('font-weight', 'normal')
+      .attr('font-size', '14')
+      .text(d => {
+        if (d.data.value) return d.data.value;
+      })
+      .style('visibility', 'hidden');
 
     // UPDATE
     const nodeUpdate = nodeEnter.merge(node);
@@ -261,16 +368,16 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             fill: #E534AB; 
             stroke: gray; 
             r: 7; 
-            opacity: 1`
+            opacity: 1`,
           );
           circle.__data__.oldFontSize = circle.parentNode.querySelector(
-            'text'
+            'text',
           ).style.fontSize;
           circle.__data__.oldWeight = circle.parentNode.querySelector(
-            'text'
+            'text',
           ).style.fontWeight;
           circle.__data__.oldOpacity = circle.parentNode.querySelector(
-            'text'
+            'text',
           ).style.opacity;
           circle.nextSibling.setAttribute(
             'style',
@@ -278,8 +385,22 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             color: #E534AB;
             font-size: 18px;
             font-weight: bold;
-            opacity: 1`
+            opacity: 1`,
           );
+          let dataProps = circle.__data__.data;
+          if (dataProps.value) {
+            let parentElement = circle.parentNode;
+            for (let element of parentElement.childNodes) {
+              if (
+                element.className.baseVal === 'modeless-popup' ||
+                element.className.baseVal === 'modeless-popup-text' ||
+                element.className.baseVal === 'modeless-popup-key'
+              ) {
+                element.setAttribute('style', 'visibility: visible');
+              }
+              console.log(element);
+            }
+          }
         }
       }
     }
@@ -295,7 +416,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             fill: ${circle.__data__.oldColor};
             opacity: ${circle.__data__.oldOpacity};
             stroke: gray; 
-            r: 5;`
+            r: 5;`,
           );
           circle.nextSibling.setAttribute(
             'style',
@@ -303,8 +424,22 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
             color: black; 
             font-size: ${circle.__data__.oldFontSize}; 
             opacity: ${circle.__data__.oldOpacity};
-            font-weight: ${circle.__data__.oldWeight};`
+            font-weight: ${circle.__data__.oldWeight};`,
           );
+          let dataProps = circle.__data__.data;
+          if (dataProps.value) {
+            let parentElement = circle.parentNode;
+            for (let element of parentElement.childNodes) {
+              if (
+                element.className.baseVal === 'modeless-popup' ||
+                element.className.baseVal === 'modeless-popup-text' ||
+                element.className.baseVal === 'modeless-popup-key'
+              ) {
+                console.log(dataProps);
+                element.setAttribute('style', 'visibility: hidden');
+              }
+            }
+          }
         }
       }
     }
@@ -316,7 +451,7 @@ const Tree = props => {
     buildTree(props.treeData, false, props.isSearching);
   });
 
-  return <div id='svg' style={{ overflow: 'auto' }} />;
+  return <div id="svg" style={{ overflow: 'auto' }} />;
 };
 
 export default Tree;
