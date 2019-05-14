@@ -21,7 +21,7 @@ Once initialized, the extension injects a script that reads data stored in Apoll
 - <i>in development:</i> time-travel view of the Apollo cache
 
 <div align="center">
-<img width="600" src="src/assets/search.png">
+<img width="600" margin-bottom="20px" src="src/assets/search.png">
 <br>
 <img width="600" src="src/assets/json_view.png">
 </div>
