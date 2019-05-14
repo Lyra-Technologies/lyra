@@ -18,6 +18,7 @@ Once initialized, the extension injects a script that reads data stored in Apoll
 - toggle visibility of nodes
 - hover on nodes to display values
 - view the normalized Apollo Client cache in JSON format
+- <i>in development:</i> time-travel view of the Apollo cache
 
 <div align="center">
 <img width="600" src="src/assets/search.png">
