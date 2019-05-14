@@ -106,8 +106,8 @@ const VisualizationContainer = props => {
         setSearchKeyValue(
           [].concat(
             searchKeyValue.slice(0, index),
-            searchKeyValue.slice(index + 1, searchKeyValue.length)
-          )
+            searchKeyValue.slice(index + 1, searchKeyValue.length),
+          ),
         );
       }
     }
@@ -119,7 +119,6 @@ const VisualizationContainer = props => {
   };
 
   const markFound = (tree, inputKeys, inputValues) => {
-    console.log(inputKeys, inputValues);
     if (inputKeys) {
       tree.markedInSearch = RegExp(`(${inputKeys})`, 'g').test(tree.name)
         ? true
@@ -130,14 +129,6 @@ const VisualizationContainer = props => {
         ? true
         : false;
     }
-    console.log(
-      inputKeys,
-      tree.name,
-      RegExp(`(${inputValues})`, 'g').test(tree.value),
-      inputValues,
-      tree.value,
-      RegExp(`(${inputKeys})`, 'g').test(tree.name)
-    );
     if (tree.children) {
       for (let index in tree.children) {
         markFound(tree.children[index], inputKeys, inputValues);
@@ -160,13 +151,13 @@ const VisualizationContainer = props => {
             let [filter, keyword] = element;
             return (
               <Label
-                as='a'
-                color='pink'
+                as="a"
+                color="pink"
                 key={'label-' + filter + '-' + keyword}
               >
                 {filter + ' : ' + keyword}
                 <Icon
-                  name='delete'
+                  name="delete"
                   onClick={handleRemoveKeyword}
                   key={'icon-' + filter + '-' + keyword}
                 />
