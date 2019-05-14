@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="50" src="src/assets/lyra_chrome_logo_med.png">
+  <img width="70" src="src/assets/lyra_chrome_logo_med.png">
   <h1 align="center">Lyra (alpha) </h1>
 </p>
 
