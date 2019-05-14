@@ -51,41 +51,41 @@ class MainContainer extends Component {
       userDefinedIndex
     );
 
-    if (userDefinedIndex < currentIndex) {
-      chrome.storage.local.get([`${userDefinedIndex + 1}`], res => {
-        console.log('response from chrome storage', res);
-        this.setState(
-          {
-            userDefinedIndex: userDefinedIndex + 1,
-            storageData: res[`${userDefinedIndex + 1}`]
-          },
-          () => console.log('this.state in handleForwardButton', this.state)
-        );
-      });
+    // if (userDefinedIndex < currentIndex) {
+    //   chrome.storage.local.get([`${userDefinedIndex + 1}`], res => {
+    //     console.log('response from chrome storage', res);
+    //     this.setState(
+    //       {
+    //         userDefinedIndex: userDefinedIndex + 1,
+    //         storageData: res[`${userDefinedIndex + 1}`]
+    //       },
+    //       () => console.log('this.state in handleForwardButton', this.state)
+    //     );
+    //   });
 
-      // else {
-      //   // #TODO make the button inactive
-      //   // index is now out of range
-      //   console.log(
-      //     'in handleForwardButton, index out of range',
-      //     userDefinedIndex
-      //   );
-      //   return { userDefinedIndex: currentIndex };
-      // }
-    }
+    //   // else {
+    //   //   // #TODO make the button inactive
+    //   //   // index is now out of range
+    //   //   console.log(
+    //   //     'in handleForwardButton, index out of range',
+    //   //     userDefinedIndex
+    //   //   );
+    //   //   return { userDefinedIndex: currentIndex };
+    //   // }
+    // }
   }
 
   handleRewindButton() {
-    this.setState((prevState, props) => {
-      if (prevState.userDefinedIndex > 1) {
-        return { userDefinedIndex: prevState.userDefinedIndex - 1 };
-      } else {
-        // #TODO make the button inactive
-        // the user shouldn't be able to go back once the index reaches 0
-        console.log('in handleRewindButton, index out of range');
-        return { userDefinedIndex: prevState.userDefinedIndex };
-      }
-    });
+    // this.setState((prevState, props) => {
+    //   if (prevState.userDefinedIndex > 1) {
+    //     return { userDefinedIndex: prevState.userDefinedIndex - 1 };
+    //   } else {
+    //     // #TODO make the button inactive
+    //     // the user shouldn't be able to go back once the index reaches 0
+    //     console.log('in handleRewindButton, index out of range');
+    //     return { userDefinedIndex: prevState.userDefinedIndex };
+    //   }
+    // });
   }
 
   componentDidMount() {
