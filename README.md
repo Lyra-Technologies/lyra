@@ -1,6 +1,6 @@
 <p align="center">
   <img width="50" src="src/assets/lyra_chrome_logo_med.png">
-  <h1 align="center">Lyra (beta) </h1>
+  <h1 align="center">Lyra (alpha) </h1>
 </p>
 
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/Lyra-Technologies/lyra/issues)
@@ -20,9 +20,9 @@ Once initialized, the extension injects a script that reads data stored in Apoll
 - view the normalized Apollo Client cache in JSON format
 
 <div align="center">
-<img width="400" src="src/assets/search.png">
+<img width="600" src="src/assets/search.png">
 <br>
-<img width="400" src="src/assets/json_view.png">
+<img width="600" src="src/assets/json_view.png">
 </div>
 
 <h2>Developers (Chrome):</h2>
@@ -31,7 +31,7 @@ Once initialized, the extension injects a script that reads data stored in Apoll
 2. run `npm run chrome` in the devtools repo. Webpack will watch the files and rebundle them automatically if you make any changes. To see your changes, close the Chrome devtool panel and reopen to see your changes in effect (no need to reload the extension in chrome://extensions, note that you will need to reload if you make changes to the extension manifest).
 
 <h2>Team:</h2>
-[Luis Croussett](https://github.com/luijocroussett)
-[Karen Huang](https://github.com/kirabird)
-[Nel Malikova](https://github.com/gmal1)
-[Tayvon Wright](https://github.com/tayvon)
+<a href="https://github.com/luijocroussett">Luis Croussett</a>
+<a href="https://github.com/kirabird">Karen Huang</a>
+<a href="https://github.com/gmal1">Nel Malikova</a>
+<a href="https://github.com/tayvon">Tayvon Wright</a>
