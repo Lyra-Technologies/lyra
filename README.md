@@ -31,7 +31,7 @@ Once initialized, the extension injects a script that reads data stored in Apoll
 2. run `npm run chrome` in the devtools repo. Webpack will watch the files and rebundle them automatically if you make any changes. To see your changes, close the Chrome devtool panel and reopen to see your changes in effect (no need to reload the extension in chrome://extensions, note that you will need to reload if you make changes to the extension manifest).
 
 <h2>Team:</h2>
-<a href="https://github.com/luijocroussett">Luis Croussett</a>
-<a href="https://github.com/kirabird">Karen Huang</a>
-<a href="https://github.com/gmal1">Nel Malikova</a>
+<a href="https://github.com/luijocroussett">Luis Croussett</a> | 
+<a href="https://github.com/kirabird">Karen Huang</a> | 
+<a href="https://github.com/gmal1">Nel Malikova</a> | 
 <a href="https://github.com/tayvon">Tayvon Wright</a>
