@@ -36,3 +36,6 @@ Once initialized, the extension injects a script that reads data stored in Apoll
 <a href="https://github.com/kirabird">Karen Huang</a> | 
 <a href="https://github.com/gmal1">Nel Malikova</a> | 
 <a href="https://github.com/tayvon">Tayvon Wright</a>
+
+<h2>Maintenance:</h2>
+Active: We are actively working on this project, and we expect to continue to do so for the foreseeable future. Bug reports, feature requests and pull requests are welcome.
