@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import * as d3 from 'd3';
-import { parse } from 'querystring';
 
 const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
   // Set the dimensions and margins of the diagram
@@ -13,7 +12,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
 
   const margin = { top: 20, right: 90, bottom: 30, left: 90 },
     width = 1200 - margin.left - margin.right,
-    height = 4830 - margin.top - margin.bottom;
+    height = 500 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   // appends a 'group' element to 'svg'
@@ -104,8 +103,7 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
         return `translate(${source.y0},${source.x0})`;
       })
       .on('click', handleClick)
-      .on('mouseover', handleMouseOver)
-      .on('mouseout', handleMouseOut);
+      .on('dblclick', handleMouseOver);
 
     // Add Circle for the nodes
     nodeEnter
@@ -146,94 +144,8 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
         if (!isSearching) return `opacity: 1; font-weight: normal`;
         if (d.data.markedInSearch) return `opacity: 1; font-weight: bold`;
         return `opacity: 0.5; font-weight: normal`;
-      })
-      .attr('cursor', 'pointer');
-
-    //add modeless popup with information information
-
-    nodeEnter
-      .append('rect')
-      .attr('class', 'modeless-popup')
-      .attr('width', d => {
-        if (d.data.value) {
-          let popupWidth =
-            d.data.name.length > d.data.value.toString().length
-              ? d.data.name.length
-              : d.data.value.length;
-          popupWidth += 9;
-          popupWidth *= 8;
-          console.log('width', popupWidth);
-          return popupWidth;
-        } else return 1e-6;
-      })
-      .attr('height', '50')
-      .attr('rx', '10')
-      .attr('fill', '333333')
-      .style('fill-opacity', '0.3')
-      .attr('x', '15')
-      .style('visibility', 'hidden');
-
-    // add text to popup
-
-    nodeEnter
-      .append('text')
-      .attr('class', 'modeless-popup-key')
-      .attr('dy', '.35em')
-      .attr('x', '25')
-      .attr('y', '15')
-      .attr('text-anchor', 'start')
-      .attr('color', '#E534AB')
-      .attr('fill', '#E534AB')
-      .attr('font-weight', 'normal')
-      .attr('font-size', '14')
-      .text('key: ')
-      .style('visibility', 'hidden');
-
-    nodeEnter
-      .append('text')
-      .attr('class', 'modeless-popup-text')
-      .attr('dy', '.35em')
-      .attr('x', '55')
-      .attr('y', '15')
-      .attr('text-anchor', 'start')
-      .attr('color', '#ffffff')
-      .attr('fill', '#ffffff')
-      .attr('font-weight', 'normal')
-      .attr('font-size', '14')
-      .text(d => {
-        if (d.data.value) return d.data.name;
-      })
-      .style('visibility', 'hidden');
-
-    nodeEnter
-      .append('text')
-      .attr('class', 'modeless-popup-key')
-      .attr('dy', '.35em')
-      .attr('x', '25')
-      .attr('y', '35')
-      .attr('text-anchor', 'start')
-      .attr('color', '#E534AB')
-      .attr('fill', '#E534AB')
-      .attr('font-weight', 'normal')
-      .attr('font-size', '14')
-      .text('value: ')
-      .style('visibility', 'hidden');
-
-    nodeEnter
-      .append('text')
-      .attr('class', 'modeless-popup-text')
-      .attr('dy', '.35em')
-      .attr('x', '65')
-      .attr('y', '35')
-      .attr('text-anchor', 'start')
-      .attr('color', '#ffffff')
-      .attr('fill', '#ffffff')
-      .attr('font-weight', 'normal')
-      .attr('font-size', '14')
-      .text(d => {
-        if (d.data.value) return d.data.value;
-      })
-      .style('visibility', 'hidden');
+      });
+    // .attr('cursor', 'pointer');
 
     // UPDATE
     const nodeUpdate = nodeEnter.merge(node);
@@ -331,6 +243,10 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       d.y0 = d.y;
     });
 
+    d3.select('g')
+      .append('use')
+      .attr('xlink:href', '#selectedNode');
+
     // resize the svg
 
     // Creates a curved (diagonal) path from parent to the child nodes
@@ -348,104 +264,169 @@ const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
       if (d.children) {
         d._children = d.children;
         d.children = null;
-      } else {
+      } else if (d._children) {
         d.children = d._children;
         d._children = null;
+      } else {
+        handleMouseOver(d);
       }
       update(d);
     }
 
     // grow when mouse hovers
     function handleMouseOver(d) {
+      console.log(d);
       let circles = document.querySelectorAll('circle');
       for (let circle of circles) {
         if (d.x === circle.__data__.x && d.y === circle.__data__.y) {
-          circle.__data__.oldColor = circle.style.fill;
-          circle.__data__.oldOpacity = circle.style.opacity;
-          circle.setAttribute(
-            'style',
-            `transition: 0.3s; 
+          console.log(d.data);
+          if (!d.hasOwnProperty('status') || d.status !== 'clicked') {
+            d.status = 'clicked';
+            circle.__data__.oldColor = circle.style.fill;
+            circle.__data__.oldOpacity = circle.style.opacity;
+            circle.setAttribute(
+              'style',
+              `transition: 0.2s; 
             fill: #E534AB; 
             stroke: gray; 
             r: 7; 
             opacity: 1`,
-          );
-          circle.__data__.oldFontSize = circle.parentNode.querySelector(
-            'text',
-          ).style.fontSize;
-          circle.__data__.oldWeight = circle.parentNode.querySelector(
-            'text',
-          ).style.fontWeight;
-          circle.__data__.oldOpacity = circle.parentNode.querySelector(
-            'text',
-          ).style.opacity;
-          circle.nextSibling.setAttribute(
-            'style',
-            `transition: 0.3s;
+            );
+            circle.__data__.oldFontSize = circle.parentNode.querySelector(
+              'text',
+            ).style.fontSize;
+            circle.__data__.oldWeight = circle.parentNode.querySelector(
+              'text',
+            ).style.fontWeight;
+            circle.__data__.oldOpacity = circle.parentNode.querySelector(
+              'text',
+            ).style.opacity;
+            circle.nextSibling.setAttribute(
+              'style',
+              `transition: 0.2s;
             color: #E534AB;
             font-size: 18px;
             font-weight: bold;
             opacity: 1`,
-          );
-          let dataProps = circle.__data__.data;
-          if (dataProps.value) {
-            let parentElement = circle.parentNode;
-            for (let element of parentElement.childNodes) {
-              if (
-                element.className.baseVal === 'modeless-popup' ||
-                element.className.baseVal === 'modeless-popup-text' ||
-                element.className.baseVal === 'modeless-popup-key'
-              ) {
-                element.setAttribute('style', 'visibility: visible');
-              }
-              console.log(element);
-            }
-          }
-        }
-      }
-    }
+            );
+            if (circle.__data__.data.hasOwnProperty('value')) {
+              let parentElement = circle.parentNode;
+              parentElement.setAttribute('id', 'selectedNode');
+              // creates use tag in order to bring modeless popup to the front of the canvas
+              document
+                .querySelector('use')
+                .setAttribute('xlinkHref', '#selectedNode');
+              let modelessPopup = d3.select('#selectedNode');
+              modelessPopup
+                .append('rect')
+                .attr('class', 'modeless-popup')
+                .attr('width', d => {
+                  if (d.data.hasOwnProperty('value')) {
+                    let popupWidth =
+                      d.data.name.length > d.data.value.toString().length
+                        ? d.data.name.length
+                        : d.data.value.length;
+                    popupWidth += 9;
+                    popupWidth *= 8;
+                    return popupWidth;
+                  } else return 1e-6;
+                })
+                .attr('height', '50')
+                .attr('rx', '10')
+                .attr('fill', '333333')
+                .style('fill-opacity', '0.8')
+                .attr('x', '15')
+                .style('visibility', 'visible');
 
-    // shrink back when mouse is out
-    function handleMouseOut(d) {
-      let circles = document.querySelectorAll('circle');
-      for (let circle of circles) {
-        if (d.x === circle.__data__.x && d.y === circle.__data__.y) {
-          circle.setAttribute(
-            'style',
-            `transition: 0.3s; 
+              // nodeEnter
+              modelessPopup
+                .append('text')
+                .attr('class', 'modeless-popup')
+                .attr('dy', '.35em')
+                .attr('x', '25')
+                .attr('y', '15')
+                .attr('text-anchor', 'start')
+                .attr('color', '#E534AB')
+                .attr('fill', '#E534AB')
+                .attr('font-weight', 'normal')
+                .attr('font-size', '14')
+                .text('key: ')
+                .style('visibility', 'visible');
+
+              modelessPopup
+                .append('text')
+                .attr('class', 'modeless-popup')
+                .attr('dy', '.35em')
+                .attr('x', '55')
+                .attr('y', '15')
+                .attr('text-anchor', 'start')
+                .attr('color', '#ffffff')
+                .attr('fill', '#ffffff')
+                .attr('font-weight', 'normal')
+                .attr('font-size', '14')
+                .text(d => {
+                  if (d.data.hasOwnProperty('value')) return d.data.name;
+                })
+                .style('visibility', 'visible');
+
+              modelessPopup
+                .append('text')
+                .attr('class', 'modeless-popup')
+                .attr('dy', '.35em')
+                .attr('x', '25')
+                .attr('y', '35')
+                .attr('text-anchor', 'start')
+                .attr('color', '#E534AB')
+                .attr('fill', '#E534AB')
+                .attr('font-weight', 'normal')
+                .attr('font-size', '14')
+                .text('value: ')
+                .style('visibility', 'visible');
+
+              modelessPopup
+                .append('text')
+                .attr('class', 'modeless-popup')
+                .attr('dy', '.35em')
+                .attr('x', '65')
+                .attr('y', '35')
+                .attr('text-anchor', 'start')
+                .attr('color', '#ffffff')
+                .attr('fill', '#ffffff')
+                .attr('font-weight', 'normal')
+                .attr('font-size', '14')
+                .text(d => {
+                  if (d.data.hasOwnProperty('value')) return d.data.value;
+                })
+                .style('visibility', 'visible');
+            }
+          } else {
+            d.status = 'not clicked';
+            circle.setAttribute(
+              'style',
+              `transition: 0.2s; 
             fill: ${circle.__data__.oldColor};
             opacity: ${circle.__data__.oldOpacity};
             stroke: gray; 
             r: 5;`,
-          );
-          circle.nextSibling.setAttribute(
-            'style',
-            `transition: 0.3s; 
+            );
+            circle.nextSibling.setAttribute(
+              'style',
+              `transition: 0.2s; 
             color: black; 
             font-size: ${circle.__data__.oldFontSize}; 
             opacity: ${circle.__data__.oldOpacity};
             font-weight: ${circle.__data__.oldWeight};`,
-          );
-          let dataProps = circle.__data__.data;
-          if (dataProps.value) {
-            let parentElement = circle.parentNode;
-            for (let element of parentElement.childNodes) {
-              if (
-                element.className.baseVal === 'modeless-popup' ||
-                element.className.baseVal === 'modeless-popup-text' ||
-                element.className.baseVal === 'modeless-popup-key'
-              ) {
-                console.log(dataProps);
-                element.setAttribute('style', 'visibility: hidden');
-              }
-            }
+            );
+            //eliminates modeless popup
+            d3.selectAll('.modeless-popup').remove();
+            // cleanup
+            document.querySelector('#selectedNode').setAttribute('id', '');
           }
         }
       }
     }
   }
 };
-
 const Tree = props => {
   useEffect(() => {
     buildTree(props.treeData, false, props.isSearching);

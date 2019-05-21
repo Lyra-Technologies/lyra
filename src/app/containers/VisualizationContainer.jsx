@@ -38,13 +38,13 @@ function parse(name = 'App', input) {
 
 const VisualizationContainer = props => {
   let [fullTree, setFullTree] = useState(parse('root', props.treeData));
-  // let [fullTree, setFullTree] = useState(props.treeData);
   let [newTree, setNewTree] = useState(null);
   let [searchKeyValue, setSearchKeyValue] = useState([]);
   let [input, setInput] = useState(null);
   let [filter, setFilter] = useState('key');
   let [isSearching, setIsSearching] = useState(false);
 
+  // lifecycle hook
   useLayoutEffect(() => {
     // separating key searches
     if (searchKeyValue.length) {
@@ -119,6 +119,7 @@ const VisualizationContainer = props => {
   };
 
   const markFound = (tree, inputKeys, inputValues) => {
+    console.log('tree before search', tree);
     if (inputKeys) {
       tree.markedInSearch = RegExp(`(${inputKeys})`, 'g').test(tree.name)
         ? true
@@ -134,6 +135,7 @@ const VisualizationContainer = props => {
         markFound(tree.children[index], inputKeys, inputValues);
       }
     }
+    console.log('tree after search', tree);
     return tree;
   };
 
@@ -165,11 +167,7 @@ const VisualizationContainer = props => {
             );
           })
         : null}
-      {isSearching ? (
-        <Tree treeData={newTree} isSearching={isSearching} />
-      ) : (
-        <Tree treeData={fullTree} isSearching={isSearching} />
-      )}
+      <Tree treeData={fullTree} isSearching={isSearching} />
     </div>
   );
 };
