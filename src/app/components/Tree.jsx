@@ -17,9 +17,8 @@ const Tree = props => {
 
   const buildTree = (treeData, isCollapsed = false, isSearching = false) => {
     // Set the dimensions and margins of the diagram
-    let temp = document.querySelectorAll('svg');
-    if (temp.length) {
-      temp.forEach(el => {
+    if (document.querySelectorAll('svg').length) {
+      document.querySelectorAll('svg').forEach(el => {
         el.remove();
       });
     }
@@ -51,10 +50,32 @@ const Tree = props => {
     root.y0 = 0;
 
     // declares a tree layout and assigns the size
-    const treemap = d3.tree().size([height, width]);
+    const treemap = d3.tree();
+    let levelsObj = treemap(root)
+      .descendants()
+      .reduce((acc, cur) => {
+        if (acc[cur.depth]) acc[cur.depth]++;
+        else acc[cur.depth] = 1;
+        return acc;
+      }, {});
+    let [newWidth, newHeight] = Object.entries(levelsObj).reduce((acc, cur) => {
+      return [
+        acc[0] >= cur[0] ? acc[0] : cur[0],
+        acc[1] >= cur[1] ? acc[1] : cur[1],
+      ];
+    });
+    newHeight =
+      newHeight * 20 > window.innerHeight ? newHeight * 20 : window.innerHeight;
+    newWidth =
+      newWidth * 180 > window.innerWidth ? newWidth * 180 : window.innerWidth;
+    treemap.size([newHeight, newWidth]);
+    let svgElement = document.querySelector('svg');
+    svgElement.setAttribute('height', newHeight + 200);
+    svgElement.setAttribute('width', newWidth + 180);
 
     // Collapse after the second level
-    if (isCollapsed) root.children.forEach(collapse);
+    // if (isCollapsed) root.children.forEach(collapse);
+    // root.children.forEach(collapse);
 
     update(root);
 
@@ -237,43 +258,35 @@ const Tree = props => {
         d.y0 = d.y;
       });
 
-      // creates use tag in order to bring modeless popup to the front of the canvas
-      if (!document.querySelectorAll('use').length) {
-        d3.select('g')
-          .append('use')
-          .attr('xlink:href', '#selectedNode');
-      }
-
       // resize svg and tree
       function recalculateSize() {
-        let maxX = 0;
-        let maxY = 0;
         let levelsObj = treeData.descendants().reduce((acc, cur) => {
           if (acc[cur.depth]) acc[cur.depth]++;
           else acc[cur.depth] = 1;
-          maxY = maxY > cur.y ? maxY : cur.y;
-          maxX = maxX > cur.x ? maxX : cur.x;
           return acc;
         }, {});
-        if (maxX > 0) {
-          let newHeight =
-            Object.values(levelsObj).reduce((acc, cur) => {
-              return acc >= cur ? acc : cur;
-            }) * 20;
-          treemap.size([newHeight, treeX]);
-          let [treeY, treeX] = treemap.size();
-          let svgElement = document.querySelector('svg');
-          svgElement.setAttribute('height', treeY + 200);
-          svgElement.setAttribute('width', treeX + 180);
-          console.log(
-            'tree size: ',
-            treemap.size(),
-            'maxX:',
-            maxY,
-            'maxX:',
-            maxX,
-          );
-        }
+        let [newWidth, newHeight] = Object.entries(levelsObj).reduce(
+          (acc, cur) => {
+            return [
+              acc[0] >= cur[0] ? acc[0] : cur[0],
+              acc[1] >= cur[1] ? acc[1] : cur[1],
+            ];
+          },
+        );
+        console.log(window.innerHeight, window.innerWidth);
+        console.log(newHeight * 20, newWidth * 180);
+        newHeight =
+          newHeight * 20 > window.innerHeight
+            ? newHeight * 20
+            : window.innerHeight - 400;
+        newWidth =
+          newWidth * 180 > window.innerWidth
+            ? newWidth * 180
+            : window.innerWidth - 400;
+        treemap.size([newHeight, newWidth]);
+        let svgElement = document.querySelector('svg');
+        svgElement.setAttribute('height', newHeight + 200);
+        svgElement.setAttribute('width', newWidth + 180);
       }
 
       // Creates a curved (diagonal) path from parent to the child nodes
@@ -329,6 +342,10 @@ const Tree = props => {
             console.log('leaves:', clickedLeaves);
             if (!d.hasOwnProperty('clicked') || !d.clicked) {
               d.clicked = true;
+              // creates <use> tag in order to bring modeless popup to the front of the canvas
+              d3.select('g')
+                .append('use')
+                .attr('xlink:href', '#selectedNode');
               clickedLeaves[id] = circle.parentNode;
               const text = clickedLeaves[id].querySelector('text');
               circle.setAttribute('style', treeStyles.selectedCircle);
@@ -417,15 +434,17 @@ const Tree = props => {
                   });
               }
             } else {
-              delete clickedLeaves[id];
               d.clicked = false;
               circle.setAttribute('style', treeStyles.unselectedCircle);
               circle.nextSibling.setAttribute(
                 'style',
                 treeStyles.unselectedText,
               );
-              //eliminates modeless popup
+              // eliminates modeless popup
               d3.selectAll('.modeless-popup').remove();
+              // clean up
+              d3.select('use').remove();
+              // creates use tag in order to bring modeless popup to the front of the canvas
               delete clickedLeaves[id];
             }
           }
