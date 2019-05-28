@@ -119,7 +119,6 @@ const VisualizationContainer = props => {
   };
 
   const markFound = (tree, inputKeys, inputValues) => {
-    console.log('tree before search', tree);
     if (inputKeys) {
       tree.markedInSearch = RegExp(`(${inputKeys})`, 'g').test(tree.name)
         ? true
@@ -135,11 +134,9 @@ const VisualizationContainer = props => {
         markFound(tree.children[index], inputKeys, inputValues);
       }
     }
-    console.log('tree after search', tree);
     return tree;
   };
 
-  // console.log('tree data in visualization container', props.treeData);
   return (
     <div style={{ padding: '10px' }}>
       <SearchBoxWithDropdown
