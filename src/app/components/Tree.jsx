@@ -3,16 +3,12 @@ import * as d3 from 'd3';
 
 const Tree = props => {
   const clickedLeaves = {};
-  const [leafData, setLeadData] = useState();
 
   let treeStyles = {
     selectedCircle: `transition: 0.2s; fill: #E534AB; stroke: gray; r: 7;`,
     selectedText: `transition: 0.2s; color: #E534AB; font-size: 18px; font-weight: bold; pacity: 1;`,
     unselectedCircle: `transition: 0.2s; fill: #280B9F; stroke: gray; r: 5;`,
     unselectedText: `transition: 0.2s; color: black; font-size: 14px; opacity: 1; font-weight: normal;`,
-    modelessPopup: '',
-    modelessPopupText: '',
-    modelessPopupValue: '',
   };
 
   useEffect(() => {
@@ -29,7 +25,7 @@ const Tree = props => {
     }
 
     const margin = { top: 20, right: 90, bottom: 30, left: 90 },
-      width = 1200 - margin.left - margin.right,
+      width = 800 - margin.left - margin.right,
       height = 500 - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
@@ -47,15 +43,15 @@ const Tree = props => {
       duration = 750,
       root;
 
-    // declares a tree layout and assigns the size
-    const treemap = d3.tree().size([height, width]);
-
     // Assigns parent, children, height, depth
     root = d3.hierarchy(treeData, function(d) {
       return d.children;
     });
     root.x0 = height / 2;
     root.y0 = 0;
+
+    // declares a tree layout and assigns the size
+    const treemap = d3.tree().size([height, width]);
 
     // Collapse after the second level
     if (isCollapsed) root.children.forEach(collapse);
@@ -76,34 +72,14 @@ const Tree = props => {
     function update(source) {
       // Assigns the x and y position for the nodes
       const treeData = treemap(root);
-      let maxY = 0;
-      let maxX = 0;
-
-      // resize svg and tree
-      // console.log(width);
-      // let newHeight = treeData.descendants() * 15;
-      // treemap.size([newHeight, width]);
-      // let svgElement = document.querySelector('svg');
-      // console.log(svgElement);
-      // svgElement.setAttribute(
-      //   'style',
-      //   `${newHeight + margin.top + margin.bottom}`,
-      // );
 
       // Compute the new tree layout.
       const nodes = treeData.descendants(),
         links = treeData.descendants().slice(1);
-
       // Normalize for fixed-depth and get maxWidth and maxHeight.
       nodes.forEach(d => {
         d.y = d.depth * 180;
-        maxY = d.y > maxY ? d.y : maxY;
-        maxY = maxY > 600 ? maxY : 600;
-        maxX = d.x > maxY ? d.x : maxX;
       });
-
-      document.querySelector('svg').setAttribute.width =
-        (maxY + margin.right + margin.left + 200).toString() + 'px';
 
       // ****************** Nodes section ***************************
 
@@ -268,7 +244,37 @@ const Tree = props => {
           .attr('xlink:href', '#selectedNode');
       }
 
-      // resize the svg
+      // resize svg and tree
+      function recalculateSize() {
+        let maxX = 0;
+        let maxY = 0;
+        let levelsObj = treeData.descendants().reduce((acc, cur) => {
+          if (acc[cur.depth]) acc[cur.depth]++;
+          else acc[cur.depth] = 1;
+          maxY = maxY > cur.y ? maxY : cur.y;
+          maxX = maxX > cur.x ? maxX : cur.x;
+          return acc;
+        }, {});
+        if (maxX > 0) {
+          let newHeight =
+            Object.values(levelsObj).reduce((acc, cur) => {
+              return acc >= cur ? acc : cur;
+            }) * 20;
+          treemap.size([newHeight, treeX]);
+          let [treeY, treeX] = treemap.size();
+          let svgElement = document.querySelector('svg');
+          svgElement.setAttribute('height', treeY + 200);
+          svgElement.setAttribute('width', treeX + 180);
+          console.log(
+            'tree size: ',
+            treemap.size(),
+            'maxX:',
+            maxY,
+            'maxX:',
+            maxX,
+          );
+        }
+      }
 
       // Creates a curved (diagonal) path from parent to the child nodes
       function diagonal(s, d) {
@@ -285,10 +291,12 @@ const Tree = props => {
         if (d.children) {
           d._children = d.children;
           d.children = null;
+          recalculateSize();
           update(d);
         } else if (d._children) {
           d.children = d._children;
           d._children = null;
+          recalculateSize();
           update(d);
         } else {
           handleLeafClick(d);
@@ -402,7 +410,10 @@ const Tree = props => {
                   .attr('font-weight', 'normal')
                   .attr('font-size', '14')
                   .text(d => {
-                    if (d.data.hasOwnProperty('value')) return d.data.value;
+                    if (d.data.hasOwnProperty('value')) {
+                      console.log(d.data.value);
+                      return d.data.value.toString();
+                    }
                   });
               }
             } else {
