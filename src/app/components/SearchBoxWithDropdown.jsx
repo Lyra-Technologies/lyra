@@ -3,26 +3,27 @@ import { Button, Select, Input } from 'semantic-ui-react';
 
 const options = [
   { key: 'key', text: 'key', value: 'key' },
-  { key: 'value', text: 'value', value: 'value' }
+  { key: 'value', text: 'value', value: 'value' },
 ];
 
 const SearchBoxWithDropdown = props => {
+  const { handleKeyPress, handleOnChange, handleOnClick } = props;
   return (
     <Input
-      onKeyUp={props.handleKeyPress}
-      className='inputSearch'
-      type='text'
-      placeholder='Search...'
+      onKeyUp={handleKeyPress}
+      className="inputSearch"
+      type="text"
+      placeholder="Search..."
       action
     >
-      <input id='inputTextBox' />
+      <input id="inputTextBox" />
       <Select
         compact
         options={options}
-        defaultValue='key'
-        onChange={props.handleOnChange}
+        defaultValue="key"
+        onChange={handleOnChange}
       />
-      <Button type='submit' onClick={props.handleOnClick}>
+      <Button type="submit" onClick={handleOnClick}>
         Search
       </Button>
     </Input>
