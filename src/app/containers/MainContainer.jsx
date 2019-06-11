@@ -25,7 +25,7 @@ class MainContainer extends Component {
 
     this.handleSidebarClick = this.handleSidebarClick.bind(this);
     this.handleRewindSlider = this.handleRewindSlider.bind(this);
-    this.handleRewindButton = this.handleRewindButton.bind(this);
+    // this.handleRewindButton = this.handleRewindButton.bind(this);
     this.handleForwardButton = this.handleForwardButton.bind(this);
   }
 

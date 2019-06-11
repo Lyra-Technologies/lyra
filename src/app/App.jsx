@@ -75,7 +75,6 @@ class App extends Component {
   render() {
     const { index } = this.state;
     return <MainContainer index={index} />;
-    // shouldUpdate={this.state.shouldUpdate}
   }
 }
 
