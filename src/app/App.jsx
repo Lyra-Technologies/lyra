@@ -8,20 +8,21 @@ class App extends Component {
       initialized: false,
       index: 0,
       shouldUpdate: false,
-      data: []
+      data: [],
     };
 
     this.portToScripts = null;
 
     const onPanelShown = () => {
       const { tabId } = chrome.devtools.inspectedWindow;
+      const { initialized } = this.state;
 
-      if (this.state.initialized) {
+      if (initialized) {
         return;
       }
       this.portToScripts.postMessage({
-        tabId: tabId,
-        message: 'initialize devtool'
+        tabId,
+        message: 'initialize devtool',
       });
       this.setState({ initialized: true });
     };
@@ -32,6 +33,7 @@ class App extends Component {
   }
 
   componentDidMount() {
+    const { index } = this.state;
     const portToScripts = chrome.runtime.connect({ name: 'devtool' }); // returns a port object
     this.portToScripts = portToScripts;
 
@@ -40,7 +42,7 @@ class App extends Component {
       // filter incoming messages
       if (message.type === 'toRender' && message.message) {
         chrome.storage.local.set(
-          { [`${this.state.index}`]: message.message.inspector },
+          { [`${index}`]: message.message.inspector },
           () => {
             // handle errors in setting Chrome storage
             if (chrome.runtime.lastError)
@@ -48,17 +50,9 @@ class App extends Component {
                 'Error setting Chrome storage',
                 chrome.runtime.lastError
               );
-            this.setState(
-              {
-                index: this.state.index + 1
-                // shouldUpdate: true
-              },
-              () =>
-                console.log(
-                  'chrome storage set, index incremented',
-                  this.state.index
-                )
-            );
+            this.setState({
+              index: index + 1,
+            });
           }
         );
       }
@@ -78,14 +72,9 @@ class App extends Component {
     });
   }
 
-  resetApp() {
-    console.log('reset app in app component is firing');
-    this.setState({ shouldUpdate: true });
-  }
-
   render() {
-    return <MainContainer index={this.state.index} />;
-    // shouldUpdate={this.state.shouldUpdate}
+    const { index } = this.state;
+    return <MainContainer index={index} />;
   }
 }
 

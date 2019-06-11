@@ -1,18 +1,15 @@
 import ReactJson from 'react-json-view';
 import React, { Component } from 'react';
-import VisualizationContainer from './VisualizationContainer';
-
 import {
   Grid,
   Menu,
   Segment,
-  Icon,
-  Image,
   Sidebar,
   Form,
   Label,
-  Button
+  Button,
 } from 'semantic-ui-react';
+import VisualizationContainer from './VisualizationContainer';
 
 class MainContainer extends Component {
   constructor(props) {
@@ -23,18 +20,18 @@ class MainContainer extends Component {
       menuHeight: 0,
       visible: false,
       storageData: {},
-      currentIndex: this.props.index
+      currentIndex: this.props.index,
     };
 
     this.handleSidebarClick = this.handleSidebarClick.bind(this);
     this.handleRewindSlider = this.handleRewindSlider.bind(this);
-    this.handleRewindButton = this.handleRewindButton.bind(this);
+    // this.handleRewindButton = this.handleRewindButton.bind(this);
     this.handleForwardButton = this.handleForwardButton.bind(this);
   }
 
   handleSidebarClick() {
     this.setState({
-      visible: !this.state.visible
+      visible: !this.state.visible,
     });
   }
 
@@ -75,18 +72,18 @@ class MainContainer extends Component {
     // }
   }
 
-  handleRewindButton() {
-    // this.setState((prevState, props) => {
-    //   if (prevState.userDefinedIndex > 1) {
-    //     return { userDefinedIndex: prevState.userDefinedIndex - 1 };
-    //   } else {
-    //     // #TODO make the button inactive
-    //     // the user shouldn't be able to go back once the index reaches 0
-    //     console.log('in handleRewindButton, index out of range');
-    //     return { userDefinedIndex: prevState.userDefinedIndex };
-    //   }
-    // });
-  }
+  // handleRewindButton() {
+  // this.setState((prevState, props) => {
+  //   if (prevState.userDefinedIndex > 1) {
+  //     return { userDefinedIndex: prevState.userDefinedIndex - 1 };
+  //   } else {
+  //     // #TODO make the button inactive
+  //     // the user shouldn't be able to go back once the index reaches 0
+  //     console.log('in handleRewindButton, index out of range');
+  //     return { userDefinedIndex: prevState.userDefinedIndex };
+  //   }
+  // });
+  // }
 
   componentDidMount() {
     // get height of menubar
@@ -103,20 +100,9 @@ class MainContainer extends Component {
           chrome.runtime.lastError
         );
       }
-      this.setState(
-        {
-          storageData: res['0']
-        },
-        () =>
-          console.log(
-            'data fetched from store',
-            res['0'],
-            'this.props.index',
-            this.props.index,
-            'this.state',
-            this.state
-          )
-      );
+      this.setState({
+        storageData: res['0'],
+      });
     });
   }
 
@@ -127,23 +113,14 @@ class MainContainer extends Component {
         this.setState(
           {
             storageData: res[`${this.props.index}`],
-            currentIndex: this.props.index
+            currentIndex: this.props.index,
           },
           () => 'cDU fetched data ',
           res[`${this.props.index}`]
         );
       });
     }
-    // if (prevState.currentIndex !== this.state.currentIndex) {
-    //   //
   }
-
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   return (
-  //     this.props.shouldUpdate !== nextProps.shouldUpdate
-  //     // this.props.index !== nextProps.currentIndex
-  //   );
-  // }
 
   render() {
     console.log(
@@ -160,47 +137,47 @@ class MainContainer extends Component {
       visible,
       menuHeight,
       rewindElHeight,
-      userDefinedIndex
+      userDefinedIndex,
     } = this.state;
 
-    let viewHeight = window.innerHeight - menuHeight - rewindElHeight;
+    const viewHeight = window.innerHeight - menuHeight - rewindElHeight;
     return (
       <div style={{ height: viewHeight }}>
         <div ref={divElement => (this.divElement = divElement)}>
           <Menu
-            attached='top'
+            attached="top"
             tabular
             inverted
             style={{
-              backgroundImage: `linear-gradient(to bottom right, teal,${schemeColor})`
+              backgroundImage: `linear-gradient(to bottom right, teal,${schemeColor})`,
             }}
           >
             <Menu.Item header>
               {/* <img alt='Lyra logo' height='20' /> */}
             </Menu.Item>
 
-            <Menu.Item name='JSON' onClick={this.handleSidebarClick}>
+            <Menu.Item name="JSON" onClick={this.handleSidebarClick}>
               view JSON data
             </Menu.Item>
           </Menu>
         </div>
-        <Sidebar.Pushable style={{ margin: 0 }} as={Segment} attached='bottom'>
+        <Sidebar.Pushable style={{ margin: 0 }} as={Segment} attached="bottom">
           <Sidebar
-            direction='left'
-            animation='push'
-            icon='labeled'
+            direction="left"
+            animation="push"
+            icon="labeled"
             visible={visible}
-            inverted='true'
-            vertical='true'
-            width='wide'
+            inverted="true"
+            vertical="true"
+            width="wide"
           >
             <ReactJson
               enableClipboard={false}
               indentWidth={2}
               displayDataTypes={false}
-              theme='threezerotwofour'
+              theme="threezerotwofour"
               src={storageData}
-              collapsed={true}
+              collapsed
             />
           </Sidebar>
 
@@ -208,14 +185,14 @@ class MainContainer extends Component {
             <Grid
               style={{
                 height: '100%',
-                marginTop: '0%'
+                marginTop: '0%',
               }}
             >
               <Grid.Row
                 style={{
                   height: viewHeight,
                   padding: '0',
-                  margin: '0'
+                  margin: '0',
                 }}
                 column={1}
               >
@@ -223,10 +200,9 @@ class MainContainer extends Component {
                   style={{
                     margin: '0',
                     height: '100%',
-                    overflow: 'scroll'
+                    overflow: 'scroll',
                   }}
                 >
-                  {/* <VisualizationContainer treeData={storageData} /> */}
                   <VisualizationContainer treeData={storageData} />
                 </Grid.Column>
               </Grid.Row>
@@ -239,34 +215,28 @@ class MainContainer extends Component {
         >
           <Segment
             style={{
-              backgroundImage: `linear-gradient(to bottom right, teal, ${schemeColor})`
+              backgroundImage: `linear-gradient(to bottom right, teal, ${schemeColor})`,
             }}
             basic
             inverted
           >
-            <Button.Group size='large' inverted color='black' icon>
-              <Button onClick={this.handleRewindButton}>
-                {/* <Icon name='shuffle' /> */}
-                rewind
-              </Button>
-              <Button style={{ margin: 0 }} as='div' labelPosition='right'>
-                <Label style={{ margin: 0 }} as='a' basic inverted='true'>
+            <Button.Group size="large" inverted color="black" icon>
+              <Button onClick={this.handleRewindButton}>rewind</Button>
+              <Button style={{ margin: 0 }} as="div" labelPosition="right">
+                <Label style={{ margin: 0 }} as="a" basic inverted="true">
                   steps: {userDefinedIndex}
                 </Label>
               </Button>
-              <Button onClick={this.handleForwardButton}>
-                fast-forward
-                {/* <Icon name='pause' /> */}
-              </Button>
+              <Button onClick={this.handleForwardButton}>fast-forward</Button>
             </Button.Group>
-            <Form inverted size='large'>
+            <Form inverted size="large">
               <Form.Input
                 min={0}
                 max={currentIndex}
-                name='userDefinedIndex'
+                name="userDefinedIndex"
                 onChange={this.handleRewindSlider}
                 step={1}
-                type='range'
+                type="range"
                 value={userDefinedIndex}
               />
             </Form>

@@ -4,12 +4,13 @@
   "version": "1.0.0",
   "description": "state visualizer for Apollo",
   "license": "ISC",
-  "main": "./src/index.js",
+  "main": "./src/index.jsx",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
     "dev": "webpack-dev-server --hot --open --mode development",
-    "chrome": "webpack --progress --hide-modules --watch"
+    "chrome": "webpack --progress --hide-modules --watch",
+    "lint": "eslint"
   },
   "babel": {
     "presets": [
@@ -41,11 +42,12 @@
   },
   "devDependencies": {
     "css-loader": "^2.1.1",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.13.0",
     "file-loader": "^3.0.1",
-    "less": "^2.7.3",
-    "less-loader": "^4.1.0",
-    "node-sass": "^4.12.0",
-    "sass-loader": "^7.1.0",
     "semantic-ui": "^2.4.2",
     "style-loader": "^0.23.1",
     "url-loader": "^1.1.2",

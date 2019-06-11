@@ -6,12 +6,11 @@ chrome.runtime.onConnect.addListener(port => {
   if (port.name === 'devtool') {
     // listen for the 'initialize devtool' message and store the port object
     // in the connections object with the tabId as the key
-    let extensionListener = message => {
+    const extensionListener = message => {
       if (message.message === 'initialize devtool' && message.tabId) {
         initialized = true;
         chrome.tabs.sendMessage(message.tabId, message);
         connections[message.tabId] = port;
-        return;
       }
     };
 
@@ -30,7 +29,7 @@ chrome.runtime.onMessage.addListener((message, sender, response) => {
         console.log('sending data to devtool, in toRender', message);
         connections[tabId].postMessage({
           type: 'toRender',
-          message: message.message
+          message: message.message,
         });
       } else {
         console.log('Tab is not in the list of connections');
@@ -65,6 +64,6 @@ chrome.webNavigation.onCommitted.addListener(event => {
   // only listen to events fired on watched tabs
   if (!connections[tabId]) return;
   if (transitionType === 'reload') {
-    connections[tabId].postMessage({ type: 'tabUpdate', tabId: tabId });
+    connections[tabId].postMessage({ type: 'tabUpdate', tabId });
   }
 });

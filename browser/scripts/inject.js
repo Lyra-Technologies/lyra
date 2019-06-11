@@ -15,14 +15,13 @@ function init() {
         mutations: client.queryManager
           ? client.queryManager.mutationStore.getStore()
           : {},
-        inspector: client.cache.extract(true)
+        inspector: client.cache.extract(true),
       };
       // send data to content script
       window.postMessage({
         type: 'inject',
-        message: data
+        message: data,
       });
-      return;
     }
   } else {
     console.log('Install and/or enable Apollo devtools to run Lyra.');
