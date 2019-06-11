@@ -50,18 +50,17 @@ chrome.runtime.onMessage.addListener((message, sender, res) => {
 // listen for data sent from injected script
 window.addEventListener('message', message => {
   if (!message.data) return;
-  if (message.data.type == 'inject') {
+  if (message.data.type === 'inject') {
     const apolloCache = message.data.message;
     // only send if next snapshot is different from previous
     if (JSON.stringify(apolloCache) === JSON.stringify(prevData)) return;
-    else {
-      prevData = apolloCache;
-      // send data to background script
-      chrome.runtime.sendMessage({
-        type: 'content',
-        message: apolloCache
-      });
-    }
+
+    prevData = apolloCache;
+    // send data to background script
+    chrome.runtime.sendMessage({
+      type: 'content',
+      message: apolloCache,
+    });
   } else if (message.data.type === 'tabUpdate') {
     chrome.runtime.sendMessage(message.data);
   }
@@ -77,7 +76,7 @@ const config = {
   attributes: true,
   characterData: true,
   childList: true,
-  subtree: true
+  subtree: true,
 };
 
 function subscriber(mutations) {
@@ -105,7 +104,6 @@ function subscriber(mutations) {
           mutation.removedNodes[0].getAttribute('id') === 'injectedScript'
         ) {
           shouldUpdate = false;
-          return;
         }
       }
     });
