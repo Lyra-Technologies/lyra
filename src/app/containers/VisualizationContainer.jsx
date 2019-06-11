@@ -38,13 +38,13 @@ function parse(name = 'App', input) {
 
 const VisualizationContainer = props => {
   let [fullTree, setFullTree] = useState(parse('root', props.treeData));
-  // let [fullTree, setFullTree] = useState(props.treeData);
   let [newTree, setNewTree] = useState(null);
   let [searchKeyValue, setSearchKeyValue] = useState([]);
   let [input, setInput] = useState(null);
   let [filter, setFilter] = useState('key');
   let [isSearching, setIsSearching] = useState(false);
 
+  // lifecycle hook
   useLayoutEffect(() => {
     // separating key searches
     if (searchKeyValue.length) {
@@ -137,7 +137,6 @@ const VisualizationContainer = props => {
     return tree;
   };
 
-  // console.log('tree data in visualization container', props.treeData);
   return (
     <div style={{ padding: '10px' }}>
       <SearchBoxWithDropdown
@@ -165,11 +164,7 @@ const VisualizationContainer = props => {
             );
           })
         : null}
-      {isSearching ? (
-        <Tree treeData={newTree} isSearching={isSearching} />
-      ) : (
-        <Tree treeData={fullTree} isSearching={isSearching} />
-      )}
+      <Tree treeData={fullTree} isSearching={isSearching} />
     </div>
   );
 };
